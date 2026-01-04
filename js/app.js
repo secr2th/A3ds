@@ -398,7 +398,7 @@ class ArtQuestApp {
   /**
    * 오늘의 과제 업데이트
    */
-  updateTodayTasks() {
+    updateTodayTasks() {
     const allTasks = storage.getTasks();
     const today = UTILS.formatDate(new Date());
     const todayTasks = allTasks.daily.filter(t => UTILS.formatDate(t.date || t.createdAt) === today);
@@ -411,7 +411,16 @@ class ArtQuestApp {
     if (!container) return;
 
     if (todayTasks.length === 0) {
-      container.innerHTML = '<div class="text-center p-4" style="color:var(--text-secondary)">오늘의 과제가 아직 없어요</div>';
+      // 👇 출석 안내 메시지로 변경
+      container.innerHTML = `
+        <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+          <p style="font-size: 48px; margin-bottom: 16px;">📅</p>
+          <p style="margin-bottom: 16px;">출석 버튼을 눌러 오늘의 과제를 받아보세요!</p>
+          <button class="btn-primary" onclick="app.tasks.attendToday()">
+            ✓ 출석하기
+          </button>
+        </div>
+      `;
       return;
     }
 
@@ -426,7 +435,11 @@ class ArtQuestApp {
         <div class="task-points">+${CONFIG.GAME.POINTS_PER_TASK}</div>
       </div>
     `).join('');
+
+    // 👇 추가
+    this.tasks.updateAttendButton();
   }
+
 
   updateWeeklyGoals() {
     const allTasks = storage.getTasks();
