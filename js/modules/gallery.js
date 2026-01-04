@@ -65,7 +65,6 @@ class GalleryManager {
    * 작품 업로드
    */
   async uploadArt() {
-    // 파일 선택
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
@@ -76,39 +75,139 @@ class GalleryManager {
       if (!file) return;
 
       try {
-        // 이미지를 Base64로 변환
         const reader = new FileReader();
-        reader.onload = async (event) => {
+        reader.onload = (event) => {
           const imageData = event.target.result;
 
-          // 메타데이터 입력 받기
-          const title = prompt('작품 제목:') || '무제';
-          const description = prompt('작품 설명 (선택):') || '';
-
-          const categories = Object.keys(CONFIG.CATEGORIES);
-          const categorySelect = prompt(
-            `카테고리를 선택하세요:\n${categories.map((c, i) =>
-              `${i + 1}. ${CONFIG.CATEGORIES[c].name}`
-            ).join('\n')}`
-          );
-
-          const categoryIndex = parseInt(categorySelect) - 1;
-          const category = categories[categoryIndex] || 'basic';
-
-          // 갤러리에 추가
-          storage.addArtwork({
-            title,
-            description,
-            category,
-            imageData,
-            thumbnail: imageData, // 실제로는 리사이징 필요
-            date: new Date().toISOString(),
-            tags: []
-          });
-
-          window.app.toast.show('✅ 작품이 추가되었어요!', 'success');
-          this.render();
+          // 👇 모달 방식으로 변경
+          this.showUploadModal(imageData);
         };
+        reader.readAsDataURL(file);
+      } catch (error) {
+        console.error('Upload error:', error);
+        window.app.toast.show('❌ 이미지를 불러올 수 없어요', 'error');
+      }
+    };
+
+    input.click();
+  }
+
+  /**
+   * 업로드 모달 표시
+   */
+  showUploadModal(imageData) {
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'upload-modal';
+
+    const categories = Object.keys(CONFIG.CATEGORIES);
+    let selectedCategory = 'basic';
+
+    modal.innerHTML = `
+      <div class="modal-content" style="max-width: 600px;">
+        <button class="close-btn" onclick="this.closest('.modal').remove()">✕</button>
+
+        <h2>🖼 작품 업로드</h2>
+
+        <img src="${imageData}" alt="Preview"
+             style="width: 100%; max-height: 300px; object-fit: contain; border-radius: 12px; margin: 20px 0; background: var(--bg-secondary);">
+
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; font-weight: 600; margin-bottom: 8px;">작품 제목</label>
+          <input type="text" id="upload-title" placeholder="예: 인체 크로키 연습"
+                 style="width: 100%;">
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; font-weight: 600; margin-bottom: 8px;">설명 (선택)</label>
+          <textarea id="upload-description" placeholder="작품에 대한 설명을 입력하세요"
+                    rows="3" style="width: 100%; resize: vertical;"></textarea>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; font-weight: 600; margin-bottom: 12px;">카테고리</label>
+          <div class="category-tags" style="display: flex; flex-wrap: wrap; gap: 8px;">
+            ${categories.map(cat => {
+              const info = CONFIG.CATEGORIES[cat];
+              return `
+                <button class="category-tag ${cat === 'basic' ? 'active' : ''}"
+                        data-category="${cat}"
+                        onclick="
+                          document.querySelectorAll('.category-tag').forEach(t => t.classList.remove('active'));
+                          this.classList.add('active');
+                        "
+                        style="
+                          padding: 8px 16px;
+                          border-radius: 20px;
+                          border: 2px solid var(--border-color);
+                          background: var(--bg-secondary);
+                          cursor: pointer;
+                          transition: all 0.2s;
+                          font-weight: 500;
+                        ">
+                  ${info.icon} ${info.name}
+                </button>
+              `;
+            }).join('')}
+          </div>
+        </div>
+
+        <button class="btn-primary" onclick="app.gallery.confirmUpload('${imageData}')" style="width: 100%;">
+          ✅ 업로드
+        </button>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // 카테고리 태그 스타일 (hover 효과)
+    const style = document.createElement('style');
+    style.textContent = `
+      .category-tag:hover {
+        border-color: var(--color-primary) !important;
+        transform: scale(1.05);
+      }
+      .category-tag.active {
+        background: var(--color-primary) !important;
+        color: white !important;
+        border-color: var(--color-primary) !important;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  /**
+   * 업로드 확인
+   */
+  confirmUpload(imageData) {
+    const title = document.getElementById('upload-title').value.trim();
+    const description = document.getElementById('upload-description').value.trim();
+    const selectedTag = document.querySelector('.category-tag.active');
+    const category = selectedTag?.getAttribute('data-category') || 'basic';
+
+    if (!title) {
+      window.app.toast.show('작품 제목을 입력해주세요', 'warning');
+      return;
+    }
+
+    // 갤러리에 추가
+    storage.addArtwork({
+      title,
+      description,
+      category,
+      imageData,
+      thumbnail: imageData,
+      date: new Date().toISOString(),
+      tags: []
+    });
+
+    // 모달 닫기
+    document.getElementById('upload-modal').remove();
+
+    window.app.toast.show('✅ 작품이 추가되었어요!', 'success');
+    this.render();
+  };
+
 
         reader.readAsDataURL(file);
       } catch (error) {
