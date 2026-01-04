@@ -772,6 +772,7 @@ class ArtQuestApp {
               return;
             }
 
+            assessment.analyzedAt = new Date().toISOString();
             storage.setAssessment(assessment);
 
             document.getElementById('step-assessment')?.classList.add('hidden');
