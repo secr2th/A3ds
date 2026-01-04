@@ -1,0 +1,3245 @@
+html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>ArtQuest - 그림 공부 게이미피케이션</title>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkFydFF1ZXN0IC0g6re466a8IOqzoeu2gCDqsozsnbTrr7ztlLzsvIDsnbTshZgiLAogICJzaG9ydF9uYW1lIjogIkFydFF1ZXN0IiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmOGZhZmMiLAogICJ0aGVtZV9jb2xvciI6ICIjNjM2NmYxIiwKICAib3JpZW50YXRpb24iOiAicG9ydHJhaXQiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJkYXRhOmltYWdlL3N2Zyt4bWwsJTNDc3ZnJTIweG1sbnMlM0QnaHR0cCUzQSUyRiUyRnd3dy53My5vcmclMkYyMDAwJTJGc3ZnJyUyMHZpZXdCb3glM0QnMCUyMDAlMjA1MTIlMjA1MTInJTNFJTNDcmVjdCUyMHdpZHRoJTNEJzUxMiclMjBoZWlnaHQlM0QnNTEyJyUyMGZpbGwlM0QnJTIzNjM2NmYxJyUyMHJ4JTNEJzEwMCclMkYlM0UlM0N0ZXh0JTIweCUzRCc1MCUyNSclMjB5JTNEJzUwJTI1JyUyMGRvbWluYW50LWJhc2VsaW5lJTNEJ21pZGRsZSclMjB0ZXh0LWFuY2hvciUzRCdtaWRkbGUnJTIwZm9udC1zaXplJTNEJzI1NiclM0UlRjAlOUYlOEUlQTglM0MlMkZ0ZXh0JTNFJTNDJTJGc3ZnJTNFIiwKICAgICAgInNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9zdmcreG1sIiwKICAgICAgInB1cnBvc2UiOiAiYW55IG1hc2thYmxlIgogICAgfQogIF0KfQ==">
+
+    <style>
+/* ============================================
+   CSS 변수 및 테마 시스템
+   - 전역 색상, 폰트, 간격 등 정의
+   - 다크모드 및 커스텀 테마 지원
+   ============================================ */
+:root {
+    /* 기본 색상 팔레트 */
+    --primary: #6366f1;
+    --primary-light: #818cf8;
+    --primary-dark: #4f46e5;
+    --secondary: #f472b6;
+    --accent: #fbbf24;
+
+    /* 시멘틱 색상 */
+    --success: #10b981;
+    --warning: #f59e0b;
+    --error: #ef4444;
+    --info: #3b82f6;
+
+    /* 배경 및 표면 */
+    --bg-primary: #f8fafc;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f1f5f9;
+    --surface: #ffffff;
+    --surface-hover: #f8fafc;
+
+    /* 텍스트 */
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-tertiary: #94a3b8;
+    --text-inverse: #ffffff;
+
+    /* 테두리 */
+    --border-light: #e2e8f0;
+    --border-medium: #cbd5e1;
+
+    /* 그림자 */
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+
+    /* 간격 */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+
+    /* 반경 */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --radius-full: 9999px;
+
+    /* 폰트 */
+    --font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    --font-size-xs: 12px;
+    --font-size-sm: 14px;
+    --font-size-md: 16px;
+    --font-size-lg: 18px;
+    --font-size-xl: 20px;
+    --font-size-2xl: 24px;
+    --font-size-3xl: 30px;
+
+    /* 트랜지션 */
+    --transition-fast: 150ms ease;
+    --transition-normal: 250ms ease;
+    --transition-slow: 350ms ease;
+
+    /* 네비게이션 */
+    --nav-height: 60px;
+    --bottom-nav-height: 70px;
+}
+
+/* 다크모드 테마 */
+[data-theme="dark"] {
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-tertiary: #334155;
+    --surface: #1e293b;
+    --surface-hover: #334155;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-tertiary: #64748b;
+    --border-light: #334155;
+    --border-medium: #475569;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.4);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.4);
+}
+
+/* ============================================
+   기본 리셋 및 전역 스타일
+   ============================================ */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-family);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* 스크롤바 스타일링 */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-tertiary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-medium);
+    border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-tertiary);
+}
+
+/* ============================================
+   앱 레이아웃
+   ============================================ */
+.app-container {
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: var(--bg-primary);
+    position: relative;
+    padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
+}
+
+/* 헤더 */
+.app-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-light);
+    padding: var(--space-md);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: var(--nav-height);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.app-logo {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-weight: 700;
+    font-size: var(--font-size-lg);
+    color: var(--primary);
+}
+
+.header-actions {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+/* 메인 콘텐츠 영역 */
+.main-content {
+    padding: var(--space-md);
+    padding-top: var(--space-lg);
+}
+
+/* 페이지 섹션 */
+.page-section {
+    display: none;
+    animation: fadeIn var(--transition-normal);
+}
+
+.page-section.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   하단 네비게이션
+   ============================================ */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-around;
+    padding: var(--space-sm) 0;
+    padding-bottom: calc(var(--space-sm) + env(safe-area-inset-bottom));
+    z-index: 100;
+    box-shadow: var(--shadow-lg);
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    color: var(--text-tertiary);
+    font-size: var(--font-size-xs);
+    min-width: 60px;
+    background: none;
+    border: none;
+}
+
+.nav-item:hover {
+    color: var(--text-secondary);
+}
+
+.nav-item.active {
+    color: var(--primary);
+}
+
+.nav-item .nav-icon {
+    font-size: 24px;
+    transition: transform var(--transition-fast);
+}
+
+.nav-item.active .nav-icon {
+    transform: scale(1.1);
+}
+
+/* ============================================
+   카드 컴포넌트
+   ============================================ */
+.card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-md);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-light);
+    transition: all var(--transition-fast);
+}
+
+.card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-md);
+}
+
+.card-title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.card-subtitle {
+    font-size: var(--font-size-sm);
+    color: var(--text-tertiary);
+    margin-top: var(--space-xs);
+}
+
+/* ============================================
+   버튼 스타일
+   ============================================ */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-lg);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-md);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    border: none;
+    outline: none;
+    white-space: nowrap;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-secondary {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    background: var(--border-light);
+}
+
+.btn-ghost {
+    background: transparent;
+    color: var(--text-secondary);
+}
+
+.btn-ghost:hover {
+    background: var(--bg-tertiary);
+}
+
+.btn-icon {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: var(--radius-full);
+}
+
+.btn-sm {
+    padding: var(--space-xs) var(--space-md);
+    font-size: var(--font-size-sm);
+}
+
+.btn-lg {
+    padding: var(--space-md) var(--space-xl);
+    font-size: var(--font-size-lg);
+}
+
+.btn-block {
+    width: 100%;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* ============================================
+   입력 필드
+   ============================================ */
+.input-group {
+    margin-bottom: var(--space-md);
+}
+
+.input-label {
+    display: block;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-xs);
+}
+
+.input-field {
+    width: 100%;
+    padding: var(--space-md);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-md);
+    background: var(--surface);
+    color: var(--text-primary);
+    transition: all var(--transition-fast);
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.input-field::placeholder {
+    color: var(--text-tertiary);
+}
+
+textarea.input-field {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* ============================================
+   체크박스 및 라디오
+   ============================================ */
+.checkbox-group, .radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.checkbox-item, .radio-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.checkbox-item:hover, .radio-item:hover {
+    background: var(--surface-hover);
+    border-color: var(--primary-light);
+}
+
+.checkbox-item.checked, .radio-item.selected {
+    background: rgba(99, 102, 241, 0.1);
+    border-color: var(--primary);
+}
+
+.custom-checkbox, .custom-radio {
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--border-medium);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.custom-radio {
+    border-radius: var(--radius-full);
+}
+
+.checkbox-item.checked .custom-checkbox,
+.radio-item.selected .custom-radio {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.custom-checkbox::after {
+    content: '✓';
+    color: white;
+    font-size: 14px;
+    opacity: 0;
+    transform: scale(0);
+    transition: all var(--transition-fast);
+}
+
+.checkbox-item.checked .custom-checkbox::after {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.custom-radio::after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    background: white;
+    border-radius: var(--radius-full);
+    opacity: 0;
+    transform: scale(0);
+    transition: all var(--transition-fast);
+}
+
+.radio-item.selected .custom-radio::after {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* ============================================
+   진행도 바
+   ============================================ */
+.progress-container {
+    margin: var(--space-md) 0;
+}
+
+.progress-bar {
+    height: 8px;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--primary-light));
+    border-radius: var(--radius-full);
+    transition: width var(--transition-slow);
+}
+
+.progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin-top: var(--space-xs);
+}
+
+/* 큰 진행도 바 */
+.progress-lg .progress-bar {
+    height: 12px;
+}
+
+/* ============================================
+   배지 및 태그
+   ============================================ */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 2px var(--space-sm);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+}
+
+.badge-primary {
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--primary);
+}
+
+.badge-success {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success);
+}
+
+.badge-warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning);
+}
+
+.badge-error {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--error);
+}
+
+.tag {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+/* ============================================
+   스탯 카드
+   ============================================ */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+}
+
+.stat-card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    text-align: center;
+    border: 1px solid var(--border-light);
+}
+
+.stat-icon {
+    font-size: 28px;
+    margin-bottom: var(--space-xs);
+}
+
+.stat-value {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.stat-label {
+    font-size: var(--font-size-sm);
+    color: var(--text-tertiary);
+}
+
+/* ============================================
+   과제 리스트
+   ============================================ */
+.task-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+    cursor: pointer;
+}
+
+.task-item:hover {
+    background: var(--surface-hover);
+    transform: translateX(4px);
+}
+
+.task-item.completed {
+    opacity: 0.7;
+    background: var(--bg-tertiary);
+}
+
+.task-item.completed .task-title {
+    text-decoration: line-through;
+    color: var(--text-tertiary);
+}
+
+.task-checkbox {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--border-medium);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all var(--transition-fast);
+    margin-top: 2px;
+}
+
+.task-item.completed .task-checkbox {
+    background: var(--success);
+    border-color: var(--success);
+}
+
+.task-item.completed .task-checkbox::after {
+    content: '✓';
+    color: white;
+    font-size: 14px;
+}
+
+.task-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.task-title {
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: var(--space-xs);
+}
+
+.task-meta {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+}
+
+.task-points {
+    color: var(--accent);
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+}
+
+/* ============================================
+   타이머 스타일
+   ============================================ */
+.timer-container {
+    text-align: center;
+    padding: var(--space-xl);
+}
+
+.timer-display {
+    font-size: 72px;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+    margin-bottom: var(--space-lg);
+}
+
+.timer-label {
+    font-size: var(--font-size-lg);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-md);
+}
+
+.timer-progress {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto var(--space-xl);
+    position: relative;
+}
+
+.timer-circle {
+    transform: rotate(-90deg);
+}
+
+.timer-circle-bg {
+    fill: none;
+    stroke: var(--bg-tertiary);
+    stroke-width: 8;
+}
+
+.timer-circle-progress {
+    fill: none;
+    stroke: var(--primary);
+    stroke-width: 8;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1s linear;
+}
+
+.timer-controls {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-md);
+}
+
+.timer-preset-buttons {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-sm);
+    margin-top: var(--space-lg);
+    flex-wrap: wrap;
+}
+
+/* ============================================
+   갤러리 스타일
+   ============================================ */
+.gallery-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-md);
+}
+
+.view-toggle {
+    display: flex;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    padding: 2px;
+}
+
+.view-toggle-btn {
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-tertiary);
+    transition: all var(--transition-fast);
+}
+
+.view-toggle-btn.active {
+    background: var(--surface);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-sm);
+}
+
+/* 그리드 뷰 */
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-sm);
+}
+
+.gallery-item {
+    aspect-ratio: 1;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    background: var(--bg-tertiary);
+    transition: transform var(--transition-fast);
+}
+
+.gallery-item:hover {
+    transform: scale(1.02);
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.gallery-item-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: var(--space-sm);
+    background: linear-gradient(transparent, rgba(0,0,0,0.7));
+    color: white;
+    font-size: var(--font-size-xs);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.gallery-item:hover .gallery-item-overlay {
+    opacity: 1;
+}
+
+/* 리스트 뷰 */
+.gallery-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.gallery-list-item {
+    display: flex;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    background: var(--surface);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-light);
+}
+
+.gallery-list-item-img {
+    width: 80px;
+    height: 80px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.gallery-list-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.gallery-list-item-title {
+    font-weight: 500;
+    margin-bottom: var(--space-xs);
+}
+
+.gallery-list-item-date {
+    font-size: var(--font-size-sm);
+    color: var(--text-tertiary);
+}
+
+/* 캘린더 뷰 */
+.calendar-container {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    border: 1px solid var(--border-light);
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-md);
+}
+
+.calendar-nav {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.calendar-day-header {
+    text-align: center;
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+    padding: var(--space-xs);
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-size: var(--font-size-sm);
+    position: relative;
+}
+
+.calendar-day:hover {
+    background: var(--bg-tertiary);
+}
+
+.calendar-day.today {
+    background: var(--primary);
+    color: white;
+}
+
+.calendar-day.has-entry::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    border-radius: var(--radius-full);
+    position: absolute;
+    bottom: 4px;
+}
+
+.calendar-day.other-month {
+    color: var(--text-tertiary);
+}
+
+/* ============================================
+   모달 스타일
+   ============================================ */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--transition-normal);
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    background: var(--surface);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    padding: var(--space-lg);
+    width: 100%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform var(--transition-normal);
+}
+
+.modal-overlay.active .modal-content {
+    transform: translateY(0);
+}
+
+.modal-handle {
+    width: 40px;
+    height: 4px;
+    background: var(--border-medium);
+    border-radius: var(--radius-full);
+    margin: 0 auto var(--space-lg);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-lg);
+}
+
+.modal-title {
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+}
+
+/* 전체 화면 모달 */
+.modal-fullscreen .modal-content {
+    border-radius: 0;
+    max-height: 100vh;
+    height: 100vh;
+}
+
+/* ============================================
+   토스트 알림
+   ============================================ */
+.toast-container {
+    position: fixed;
+    top: var(--space-lg);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1100;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    width: calc(100% - var(--space-lg) * 2);
+    max-width: 400px;
+    pointer-events: none;
+}
+
+.toast {
+    background: var(--surface);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    animation: slideIn var(--transition-normal);
+    pointer-events: auto;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.toast-success {
+    border-left: 4px solid var(--success);
+}
+
+.toast-error {
+    border-left: 4px solid var(--error);
+}
+
+.toast-warning {
+    border-left: 4px solid var(--warning);
+}
+
+.toast-info {
+    border-left: 4px solid var(--info);
+}
+
+/* ============================================
+   설정 페이지
+   ============================================ */
+.settings-group {
+    margin-bottom: var(--space-xl);
+}
+
+.settings-group-title {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: var(--space-sm);
+    padding: 0 var(--space-sm);
+}
+
+.settings-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-md);
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    margin-bottom: -1px;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.settings-item:first-of-type {
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.settings-item:last-of-type {
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+    margin-bottom: 0;
+}
+
+.settings-item:only-of-type {
+    border-radius: var(--radius-md);
+}
+
+.settings-item:hover {
+    background: var(--surface-hover);
+}
+
+.settings-item-left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.settings-item-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.settings-item-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.settings-item-label {
+    font-weight: 500;
+}
+
+.settings-item-desc {
+    font-size: var(--font-size-sm);
+    color: var(--text-tertiary);
+}
+
+.settings-item-right {
+    color: var(--text-tertiary);
+}
+
+/* 토글 스위치 */
+.toggle-switch {
+    width: 48px;
+    height: 28px;
+    background: var(--border-medium);
+    border-radius: var(--radius-full);
+    position: relative;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.toggle-switch.active {
+    background: var(--primary);
+}
+
+.toggle-switch::after {
+    content: '';
+    width: 22px;
+    height: 22px;
+    background: white;
+    border-radius: var(--radius-full);
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    transition: transform var(--transition-fast);
+    box-shadow: var(--shadow-sm);
+}
+
+.toggle-switch.active::after {
+    transform: translateX(20px);
+}
+
+/* 색상 선택기 */
+.color-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: var(--space-sm);
+    margin-top: var(--space-md);
+}
+
+.color-option {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: transform var(--transition-fast);
+    border: 3px solid transparent;
+}
+
+.color-option:hover {
+    transform: scale(1.1);
+}
+
+.color-option.selected {
+    border-color: var(--text-primary);
+}
+
+/* ============================================
+   온보딩 스타일
+   ============================================ */
+.onboarding-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-xl);
+}
+
+.onboarding-progress {
+    margin-bottom: var(--space-xl);
+}
+
+.onboarding-step-indicator {
+    display: flex;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+}
+
+.step-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+    background: var(--border-medium);
+    transition: all var(--transition-fast);
+}
+
+.step-dot.active {
+    width: 24px;
+    background: var(--primary);
+}
+
+.step-dot.completed {
+    background: var(--success);
+}
+
+.onboarding-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.onboarding-title {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    margin-bottom: var(--space-sm);
+}
+
+.onboarding-desc {
+    color: var(--text-secondary);
+    margin-bottom: var(--space-xl);
+}
+
+.onboarding-actions {
+    margin-top: auto;
+    display: flex;
+    gap: var(--space-md);
+}
+
+/* 실력 체크리스트 */
+.skill-category {
+    margin-bottom: var(--space-xl);
+}
+
+.skill-category-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+
+.skill-category-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+.skill-category-name {
+    font-weight: 600;
+    font-size: var(--font-size-lg);
+}
+
+.skill-levels {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.skill-level-btn {
+    flex: 1;
+    padding: var(--space-md);
+    background: var(--surface);
+    border: 2px solid var(--border-light);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-align: center;
+}
+
+.skill-level-btn:hover {
+    border-color: var(--primary-light);
+}
+
+.skill-level-btn.selected {
+    border-color: var(--primary);
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.skill-level-label {
+    font-weight: 500;
+    display: block;
+    margin-bottom: var(--space-xs);
+}
+
+.skill-level-desc {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+}
+
+/* ============================================
+   차트 및 분석
+   ============================================ */
+.radar-chart-container {
+    aspect-ratio: 1;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+.analysis-item {
+    display: flex;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    background: var(--surface);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-sm);
+    border: 1px solid var(--border-light);
+}
+
+.analysis-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.analysis-icon.strength {
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.analysis-icon.weakness {
+    background: rgba(245, 158, 11, 0.1);
+}
+
+.analysis-content h4 {
+    font-weight: 500;
+    margin-bottom: var(--space-xs);
+}
+
+.analysis-content p {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+/* ============================================
+   리소스 카드
+   ============================================ */
+.resource-card {
+    display: flex;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.resource-card:hover {
+    border-color: var(--primary-light);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.resource-thumbnail {
+    width: 80px;
+    height: 60px;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 24px;
+}
+
+.resource-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.resource-title {
+    font-weight: 500;
+    margin-bottom: var(--space-xs);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.resource-meta {
+    font-size: var(--font-size-sm);
+    color: var(--text-tertiary);
+}
+
+/* ============================================
+   주간 리포트
+   ============================================ */
+.report-summary {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
+}
+
+.report-metric {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    text-align: center;
+    border: 1px solid var(--border-light);
+}
+
+.report-metric-value {
+    font-size: var(--font-size-3xl);
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.report-metric-label {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin-top: var(--space-xs);
+}
+
+.report-chart {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-lg);
+    border: 1px solid var(--border-light);
+}
+
+.weekly-chart {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    height: 120px;
+    padding-top: var(--space-md);
+}
+
+.chart-bar-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
+    flex: 1;
+}
+
+.chart-bar {
+    width: 24px;
+    background: linear-gradient(to top, var(--primary), var(--primary-light));
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    transition: height var(--transition-slow);
+}
+
+.chart-bar-label {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+}
+
+/* ============================================
+   로딩 상태
+   ============================================ */
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border-light);
+    border-top-color: var(--primary);
+    border-radius: var(--radius-full);
+    animation: spin 1s linear infinite;
+    margin: var(--space-xl) auto;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.skeleton {
+    background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--border-light) 50%, var(--bg-tertiary) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: var(--radius-sm);
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.skeleton-text {
+    height: 16px;
+    margin-bottom: var(--space-sm);
+}
+
+.skeleton-title {
+    height: 24px;
+    width: 60%;
+    margin-bottom: var(--space-md);
+}
+
+.skeleton-card {
+    height: 100px;
+    margin-bottom: var(--space-md);
+}
+
+/* ============================================
+   빈 상태
+   ============================================ */
+.empty-state {
+    text-align: center;
+    padding: var(--space-2xl);
+    color: var(--text-tertiary);
+}
+
+.empty-state-icon {
+    font-size: 64px;
+    margin-bottom: var(--space-md);
+    opacity: 0.5;
+}
+
+.empty-state-title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-sm);
+}
+
+.empty-state-desc {
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--space-lg);
+}
+
+/* ============================================
+   탭 네비게이션
+   ============================================ */
+.tabs {
+    display: flex;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    padding: 4px;
+    margin-bottom: var(--space-lg);
+}
+
+.tab-btn {
+    flex: 1;
+    padding: var(--space-sm) var(--space-md);
+    background: none;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.tab-btn.active {
+    background: var(--surface);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-sm);
+}
+
+/* ============================================
+   플로팅 액션 버튼
+   ============================================ */
+.fab {
+    position: fixed;
+    bottom: calc(var(--bottom-nav-height) + var(--space-lg) + env(safe-area-inset-bottom));
+    right: var(--space-lg);
+    width: 56px;
+    height: 56px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-full);
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: var(--shadow-lg);
+    transition: all var(--transition-fast);
+    z-index: 50;
+}
+
+.fab:hover {
+    transform: scale(1.1);
+    box-shadow: var(--shadow-xl);
+}
+
+.fab:active {
+    transform: scale(0.95);
+}
+
+/* ============================================
+   반응형 스타일
+   ============================================ */
+@media (min-width: 768px) {
+    .app-container {
+        max-width: 600px;
+        border-left: 1px solid var(--border-light);
+        border-right: 1px solid var(--border-light);
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .gallery-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 360px) {
+    :root {
+        --font-size-md: 14px;
+        --font-size-lg: 16px;
+        --font-size-xl: 18px;
+        --font-size-2xl: 20px;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ============================================
+   접근성 개선
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* 포커스 스타일 */
+:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* ============================================
+   폰트 임베딩 영역
+   ============================================ */
+.custom-font-style {
+    /* 사용자 정의 폰트가 여기에 추가됨 */
+}
+
+/* ============================================
+   AI 채팅 스타일
+   ============================================ */
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - var(--nav-height) - var(--bottom-nav-height) - env(safe-area-inset-bottom));
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.chat-message {
+    max-width: 85%;
+    padding: var(--space-md);
+    border-radius: var(--radius-lg);
+    animation: messageIn var(--transition-normal);
+}
+
+@keyframes messageIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.chat-message.user {
+    align-self: flex-end;
+    background: var(--primary);
+    color: white;
+    border-bottom-right-radius: var(--radius-sm);
+}
+
+.chat-message.assistant {
+    align-self: flex-start;
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-bottom-left-radius: var(--radius-sm);
+}
+
+.chat-input-container {
+    padding: var(--space-md);
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-light);
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.chat-input {
+    flex: 1;
+    padding: var(--space-md);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-md);
+    background: var(--surface);
+    color: var(--text-primary);
+}
+
+.chat-input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.chat-send-btn {
+    width: 44px;
+    height: 44px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.chat-send-btn:hover {
+    background: var(--primary-dark);
+}
+
+.chat-send-btn:disabled {
+    background: var(--border-medium);
+    cursor: not-allowed;
+}
+
+/* 타이핑 인디케이터 */
+.typing-indicator {
+    display: flex;
+    gap: 4px;
+    padding: var(--space-md);
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-light);
+    width: fit-content;
+}
+
+.typing-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--text-tertiary);
+    border-radius: var(--radius-full);
+    animation: typingBounce 1.4s infinite;
+}
+
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingBounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-8px); }
+}
+    </style>
+</head>
+<body>
+    <!-- ============================================
+         앱 컨테이너
+         - 메인 앱 래퍼
+         ============================================ -->
+    <div class="app-container" id="app">
+        <!-- 토스트 알림 컨테이너 -->
+        <div class="toast-container" id="toastContainer"></div>
+
+        <!-- 앱 헤더 -->
+        <header class="app-header">
+            <div class="app-logo">
+                <span>🎨</span>
+                <span>ArtQuest</span>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-icon btn-ghost" id="notificationBtn" title="알림">
+                    🔔
+                </button>
+                <button class="btn btn-icon btn-ghost" id="settingsHeaderBtn" title="설정">
+                    ⚙️
+                </button>
+            </div>
+        </header>
+
+        <!-- 메인 콘텐츠 -->
+        <main class="main-content" id="mainContent">
+            <!-- ============================================
+                 온보딩 섹션
+                 - API 키 설정 및 실력 체크리스트
+                 ============================================ -->
+            <section class="page-section" id="onboardingSection">
+                <div class="onboarding-container">
+                    <!-- 진행 상태 표시 -->
+                    <div class="onboarding-progress">
+                        <div class="onboarding-step-indicator" id="stepIndicator">
+                            <div class="step-dot active"></div>
+                            <div class="step-dot"></div>
+                            <div class="step-dot"></div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="onboardingProgress" style="width: 33%"></div>
+                        </div>
+                    </div>
+
+                    <!-- 온보딩 단계별 컨텐츠 -->
+                    <div class="onboarding-content" id="onboardingContent">
+                        <!-- JavaScript로 동적 생성 -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================
+                 대시보드 섹션
+                 - 스탯, 오늘의 과제, 진행도
+                 ============================================ -->
+            <section class="page-section" id="dashboardSection">
+                <!-- 환영 메시지 -->
+                <div class="card" id="welcomeCard">
+                    <div class="card-header">
+                        <div>
+                            <h2 class="card-title">
+                                <span id="greetingEmoji">👋</span>
+                                <span id="greetingText">안녕하세요!</span>
+                            </h2>
+                            <p class="card-subtitle" id="dateDisplay"></p>
+                        </div>
+                        <div class="badge badge-primary" id="streakBadge">
+                            🔥 0일 연속
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 스탯 그리드 -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">⭐</div>
+                        <div class="stat-value" id="totalPoints">0</div>
+                        <div class="stat-label">총 포인트</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-value" id="completedTasks">0</div>
+                        <div class="stat-label">완료한 과제</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📚</div>
+                        <div class="stat-value" id="studyDays">0</div>
+                        <div class="stat-label">학습 일수</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🎯</div>
+                        <div class="stat-value" id="currentLevel">Lv.1</div>
+                        <div class="stat-label">현재 레벨</div>
+                    </div>
+                </div>
+
+                <!-- 오늘의 진행도 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">📊 오늘의 진행도</h3>
+                        <span class="badge badge-success" id="todayProgressBadge">0%</span>
+                    </div>
+                    <div class="progress-container progress-lg">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="todayProgressBar" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-label">
+                            <span id="completedCount">0</span>
+                            <span id="totalCount">/ 0 과제</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 오늘의 과제 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">📝 오늘의 과제</h3>
+                        <button class="btn btn-sm btn-ghost" id="refreshTasksBtn">
+                            🔄 새로고침
+                        </button>
+                    </div>
+                    <div class="task-list" id="todayTaskList">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📋</div>
+                            <div class="empty-state-title">과제를 불러오는 중...</div>
+                            <div class="empty-state-desc">AI가 맞춤 과제를 생성하고 있습니다.</div>
+                            <div class="loading-spinner"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 학습 팁 -->
+                <div class="card" id="tipCard">
+                    <div class="card-header">
+                        <h3 class="card-title">💡 오늘의 팁</h3>
+                    </div>
+                    <p id="dailyTip" class="card-subtitle">잠시만 기다려주세요...</p>
+                </div>
+            </section>
+
+            <!-- ============================================
+                 타이머 섹션
+                 - 포모도로 타이머
+                 ============================================ -->
+            <section class="page-section" id="timerSection">
+                <div class="card">
+                    <div class="timer-container">
+                        <div class="timer-label" id="timerLabel">집중 시간</div>
+
+                        <div class="timer-progress">
+                            <svg class="timer-circle" viewBox="0 0 200 200">
+                                <circle class="timer-circle-bg" cx="100" cy="100" r="90"/>
+                                <circle class="timer-circle-progress" id="timerCircle" cx="100" cy="100" r="90"
+                                    stroke-dasharray="565.48"
+                                    stroke-dashoffset="0"/>
+                            </svg>
+                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                                <div class="timer-display" id="timerDisplay">25:00</div>
+                            </div>
+                        </div>
+
+                        <div class="timer-controls">
+                            <button class="btn btn-secondary btn-icon" id="timerResetBtn">
+                                ↺
+                            </button>
+                            <button class="btn btn-primary btn-lg" id="timerStartBtn">
+                                ▶️ 시작
+                            </button>
+                            <button class="btn btn-secondary btn-icon" id="timerSkipBtn">
+                                ⏭️
+                            </button>
+                        </div>
+
+                        <div class="timer-preset-buttons">
+                            <button class="btn btn-sm btn-secondary timer-preset" data-minutes="15">15분</button>
+                            <button class="btn btn-sm btn-primary timer-preset" data-minutes="25">25분</button>
+                            <button class="btn btn-sm btn-secondary timer-preset" data-minutes="45">45분</button>
+                            <button class="btn btn-sm btn-secondary timer-preset" data-minutes="60">60분</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 타이머 기록 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">📈 오늘의 집중 시간</h3>
+                    </div>
+                    <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr);">
+                        <div class="stat-card">
+                            <div class="stat-value" id="focusSessions">0</div>
+                            <div class="stat-label">완료 세션</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalFocusTime">0분</div>
+                            <div class="stat-label">총 집중 시간</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================
+                 분석 섹션
+                 - 강점/약점, AI 분석
+                 ============================================ -->
+            <section class="page-section" id="analysisSection">
+                <!-- 실력 레이더 차트 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">📊 실력 분석</h3>
+                        <button class="btn btn-sm btn-ghost" id="editSkillsBtn">
+                            ✏️ 수정
+                        </button>
+                    </div>
+                    <div class="radar-chart-container">
+                        <canvas id="skillRadarChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- 강점 분석 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">💪 강점</h3>
+                    </div>
+                    <div id="strengthsList">
+                        <div class="skeleton skeleton-card"></div>
+                    </div>
+                </div>
+
+                <!-- 약점 분석 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">🎯 개선 영역</h3>
+                    </div>
+                    <div id="weaknessesList">
+                        <div class="skeleton skeleton-card"></div>
+                    </div>
+                </div>
+
+                <!-- AI 맞춤 조언 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">🤖 AI 맞춤 조언</h3>
+                        <button class="btn btn-sm btn-ghost" id="refreshAdviceBtn">
+                            🔄
+                        </button>
+                    </div>
+                    <div id="aiAdvice" class="card-subtitle">
+                        AI가 분석 중입니다...
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================
+                 리소스 섹션
+                 - 학습 자료 추천
+                 ============================================ -->
+            <section class="page-section" id="resourcesSection">
+                <!-- 카테고리 탭 -->
+                <div class="tabs" id="resourceTabs">
+                    <button class="tab-btn active" data-category="all">전체</button>
+                    <button class="tab-btn" data-category="basic">기초</button>
+                    <button class="tab-btn" data-category="anatomy">인체</button>
+                    <button class="tab-btn" data-category="perspective">원근법</button>
+                </div>
+
+                <!-- AI 추천 리소스 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">🎓 AI 추천 학습 자료</h3>
+                    </div>
+                    <div id="aiResourceList">
+                        <div class="skeleton skeleton-card"></div>
+                        <div class="skeleton skeleton-card"></div>
+                    </div>
+                </div>
+
+                <!-- 일반 리소스 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">📚 학습 자료</h3>
+                    </div>
+                    <div id="resourceList">
+                        <!-- JavaScript로 동적 생성 -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================
+                 갤러리 섹션
+                 - 작품 기록
+                 ============================================ -->
+            <section class="page-section" id="gallerySection">
+                <!-- 갤러리 헤더 -->
+                <div class="gallery-header">
+                    <h2 style="font-size: var(--font-size-xl); font-weight: 600;">🖼️ 나의 갤러리</h2>
+                    <div class="view-toggle">
+                        <button class="view-toggle-btn active" data-view="grid" title="그리드 뷰">
+                            ⊞
+                        </button>
+                        <button class="view-toggle-btn" data-view="list" title="리스트 뷰">
+                            ☰
+                        </button>
+                        <button class="view-toggle-btn" data-view="calendar" title="캘린더 뷰">
+                            📅
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 갤러리 컨텐츠 -->
+                <div id="galleryContent">
+                    <!-- 그리드 뷰 -->
+                    <div class="gallery-grid" id="galleryGrid">
+                        <!-- JavaScript로 동적 생성 -->
+                    </div>
+
+                    <!-- 리스트 뷰 -->
+                    <div class="gallery-list" id="galleryList" style="display: none;">
+                        <!-- JavaScript로 동적 생성 -->
+                    </div>
+
+                    <!-- 캘린더 뷰 -->
+                    <div class="calendar-container" id="galleryCalendar" style="display: none;">
+                        <div class="calendar-header">
+                            <button class="btn btn-sm btn-ghost" id="prevMonthBtn">◀</button>
+                            <span id="currentMonthLabel" style="font-weight: 600;"></span>
+                            <button class="btn btn-sm btn-ghost" id="nextMonthBtn">▶</button>
+                        </div>
+                        <div class="calendar-grid" id="calendarGrid">
+                            <!-- JavaScript로 동적 생성 -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 빈 상태 -->
+                <div class="empty-state" id="galleryEmpty">
+                    <div class="empty-state-icon">🎨</div>
+                    <div class="empty-state-title">아직 작품이 없어요</div>
+                    <div class="empty-state-desc">첫 번째 작품을 업로드해보세요!</div>
+                    <button class="btn btn-primary" id="uploadFirstBtn">
+                        📤 작품 업로드
+                    </button>
+                </div>
+
+                <!-- 플로팅 업로드 버튼 -->
+                <button class="fab" id="uploadFab" title="작품 업로드">
+                    +
+                </button>
+            </section>
+
+            <!-- ============================================
+                 리포트 섹션
+                 - 주간/월간 리포트
+                 ============================================ -->
+            <section class="page-section" id="reportSection">
+                <!-- 기간 선택 -->
+                <div class="tabs">
+                    <button class="tab-btn active" data-period="week">이번 주</button>
+                    <button class="tab-btn" data-period="month">이번 달</button>
+                    <button class="tab-btn" data-period="all">전체</button>
+                </div>
+
+                <!-- 요약 통계 -->
+                <div class="report-summary">
+                    <div class="report-metric">
+                        <div class="report-metric-value" id="reportTasks">0</div>
+                        <div class="report-metric-label">완료 과제</div>
+                    </div>
+                    <div class="report-metric">
+                        <div class="report-metric-value" id="reportPoints">0</div>
+                        <div class="report-metric-label">획득 포인트</div>
+                    </div>
+                    <div class="report-metric">
+                        <div class="report-metric-value" id="reportStreak">0</div>
+                        <div class="report-metric-label">최장 연속</div>
+                    </div>
+                    <div class="report-metric">
+                        <div class="report-metric-value" id="reportTime">0h</div>
+                        <div class="report-metric-label">학습 시간</div>
+                    </div>
+                </div>
+
+                <!-- 일별 활동 차트 -->
+                <div class="report-chart">
+                    <h3 class="card-title" style="margin-bottom: var(--space-md);">📈 일별 활동</h3>
+                    <div class="weekly-chart" id="weeklyChart">
+                        <!-- JavaScript로 동적 생성 -->
+                    </div>
+                </div>
+
+                <!-- 카테고리별 진행도 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">📊 카테고리별 진행도</h3>
+                    </div>
+                    <div id="categoryProgress">
+                        <!-- JavaScript로 동적 생성 -->
+                    </div>
+                </div>
+
+                <!-- AI 주간 평가 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">🤖 AI 주간 평가</h3>
+                    </div>
+                    <div id="weeklyAiReview">
+                        <div class="skeleton skeleton-text"></div>
+                        <div class="skeleton skeleton-text"></div>
+                        <div class="skeleton skeleton-text" style="width: 80%"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================
+                 AI 채팅 섹션
+                 - AI와 대화
+                 ============================================ -->
+            <section class="page-section" id="chatSection">
+                <div class="chat-container">
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="chat-message assistant">
+                            안녕하세요! 저는 ArtQuest AI 멘토예요. 🎨<br><br>
+                            그림 공부에 대해 궁금한 점이 있으면 무엇이든 물어보세요!
+                        </div>
+                    </div>
+                    <div class="chat-input-container">
+                        <input type="text" class="chat-input" id="chatInput" placeholder="메시지를 입력하세요...">
+                        <button class="chat-send-btn" id="chatSendBtn">➤</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================
+                 설정 섹션
+                 - 개인화 및 앱 설정
+                 ============================================ -->
+            <section class="page-section" id="settingsSection">
+                <!-- API 설정 -->
+                <div class="settings-group">
+                    <div class="settings-group-title">API 설정</div>
+                    <div class="settings-item" id="apiKeySettings">
+                        <div class="settings-item-left">
+                            <div class="settings-item-icon">🔑</div>
+                            <div class="settings-item-content">
+                                <div class="settings-item-label">Gemini API 키</div>
+                                <div class="settings-item-desc" id="apiKeyStatus">설정되지 않음</div>
+                            </div>
+                        </div>
+                        <div class="settings-item-right">›</div>
+                    </div>
+                </div>
+
+                <!-- 테마 설정 -->
+                <div class="settings-group">
+                    <div class="settings-group-title">테마</div>
+                    <div class="settings-item" id="darkModeToggle">
+                        <div class="settings-item-left">
+                            <div class="settings-item-icon">🌙</div>
+                            <div class="settings-item-content">
+                                <div class="settings-item-label">다크 모드</div>
+                                <div class="settings-item-desc">어두운 테마 사용</div>
+                            </div>
+                        </div>
+                        <div class="toggle-switch" id="darkModeSwitch"></div>
+                    </div>
+                    <div class="settings-item" id="accentColorSettings">
+                        <div class="settings-item-left">
+                            <div class="settings-item-icon">🎨</div>
+                            <div class="settings-item-content">
+                                <div class="settings-item-label">강조 색상</div>
+                                <div class="settings-item-desc">앱 테마 색상 변경</div>
+                            </div>
+                        </div>
+                        <div class="settings-item-right">›</div>
+                    </div>
+                    <div class="settings-item" id="fontSettings">
+                        <div class="settings-item-left">
+                            <div class="settings-item-icon">🔤</div>
+                            <div class="settings-item-content">
+                                <div class="settings-item-label">폰트 설정</div>
+                                <div class="settings-item-desc">사용자 정의 폰트 추가</div>
+                            </div>
+                        </div>
+                        <div class="settings-item-right">›</div>
+                    </div>
+                </div>
+
+                <!-- 알림 설정 -->
+                <div class="settings-group">
+                    <div class="settings-group-title">알림</div>
+                    <div class="settings-item" id="notificationToggle">
+                        <div class="settings-item-left">
+                            <div class="settings-item-icon">🔔</div>
+                            <div class="settings-item-content">
+                                <div class="settings-item-label">푸시 알림</div>
+                                <div class="settings-item-desc">학습 리마인더 받기</div>
+                            </div>
+                        </div>
+                        <div class="toggle-switch" id="notificationSwitch"></div>
+                    </div>
+                    <div class="settings-item" id="reminderTimeSettings">
+                        <div class="settings-item-left">
+                            <div class="settings-item-icon">⏰</div>
+                            <div class="settings-item-content">
+                                <div class="settings-item-label">알림 시간</div>
+                                <div class="settings-item-desc" id="reminderTimeDisplay">오전 9:00</div>
+                            </div>
+                        </div>
+                        <div class="settings-item-right">›</div>
+                    </div>
+                </div>
+
+                <!-- 학습 설정 -->
+                <div class="settings-group">
+                    <div class="settings-group-title">학습</div>
+                    <div class="settings-item" id="editAssessmentBtn">
+                        <div class="settings-item-left">
+                            <div class="settings-item-icon">📝</div>
+                            <div class="settings-item-content">
+                                <div class="settings-item-label">실력 자가진단 수정</div>
+                                <div class="settings-item-desc">실력 레벨 재설정</div>
+                            </div>
+                        </div>
+                        <div class="settings-item-right">›</div>
+                    </div>
+                    <div class="settings-item" id="resetProgressBtn">
+                        <div class="settings-item-left">
+                            <div class="settings-item-icon">🔄</div>
+                            <div class="settings-item-content">
+                                <div class="settings-item-label">진행 상황 초기화</div>
+                                <div class="settings-item-desc">모든 데이터 삭제</div>
+                            </div>
+                        </div>
+                        <div class="settings-item-right">›</div>
+                    </div>
+                </div>
+
+                <!-- 앱 정보 -->
+                <div class="settings-group">
+                    <div class="settings-group-title">앱 정보</div>
+                    <div class="settings-item">
+                        <div class="settings-item-left">
+                            <div class="settings-item-icon">ℹ️</div>
+                            <div class="settings-item-content">
+                                <div class="settings-item-label">버전</div>
+                                <div class="settings-item-desc">1.0.0</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings-item" id="installAppBtn">
+                        <div class="settings-item-left">
+                            <div class="settings-item-icon">📲</div>
+                            <div class="settings-item-content">
+                                <div class="settings-item-label">앱 설치</div>
+                                <div class="settings-item-desc">홈 화면에 추가</div>
+                            </div>
+                        </div>
+                        <div class="settings-item-right">›</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- 하단 네비게이션 -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-section="dashboard">
+                <span class="nav-icon">🏠</span>
+                <span>홈</span>
+            </button>
+            <button class="nav-item" data-section="timer">
+                <span class="nav-icon">⏱️</span>
+                <span>타이머</span>
+            </button>
+            <button class="nav-item" data-section="analysis">
+                <span class="nav-icon">📊</span>
+                <span>분석</span>
+            </button>
+            <button class="nav-item" data-section="gallery">
+                <span class="nav-icon">🖼️</span>
+                <span>갤러리</span>
+            </button>
+            <button class="nav-item" data-section="chat">
+                <span class="nav-icon">💬</span>
+                <span>AI 멘토</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- ============================================
+         모달 템플릿들
+         ============================================ -->
+
+    <!-- API 키 입력 모달 -->
+    <div class="modal-overlay" id="apiKeyModal">
+        <div class="modal-content">
+            <div class="modal-handle"></div>
+            <div class="modal-header">
+                <h3 class="modal-title">🔑 API 키 설정</h3>
+                <button class="btn btn-icon btn-ghost modal-close">✕</button>
+            </div>
+            <div class="input-group">
+                <label class="input-label">Gemini API 키</label>
+                <input type="password" class="input-field" id="apiKeyInput" placeholder="API 키를 입력하세요">
+            </div>
+            <p style="font-size: var(--font-size-sm); color: var(--text-tertiary); margin-bottom: var(--space-lg);">
+                API 키는 <a href="https://makersuite.google.com/app/apikey" target="_blank" style="color: var(--primary);">Google AI Studio</a>에서 무료로 발급받을 수 있습니다.
+            </p>
+            <button class="btn btn-primary btn-block" id="saveApiKeyBtn">저장</button>
+        </div>
+    </div>
+
+    <!-- 색상 선택 모달 -->
+    <div class="modal-overlay" id="colorPickerModal">
+        <div class="modal-content">
+            <div class="modal-handle"></div>
+            <div class="modal-header">
+                <h3 class="modal-title">🎨 강조 색상</h3>
+                <button class="btn btn-icon btn-ghost modal-close">✕</button>
+            </div>
+            <div class="color-picker-grid" id="colorPickerGrid">
+                <div class="color-option selected" data-color="#6366f1" style="background: #6366f1;"></div>
+                <div class="color-option" data-color="#8b5cf6" style="background: #8b5cf6;"></div>
+                <div class="color-option" data-color="#ec4899" style="background: #ec4899;"></div>
+                <div class="color-option" data-color="#f43f5e" style="background: #f43f5e;"></div>
+                <div class="color-option" data-color="#f97316" style="background: #f97316;"></div>
+                <div class="color-option" data-color="#eab308" style="background: #eab308;"></div>
+                <div class="color-option" data-color="#22c55e" style="background: #22c55e;"></div>
+                <div class="color-option" data-color="#14b8a6" style="background: #14b8a6;"></div>
+                <div class="color-option" data-color="#06b6d4" style="background: #06b6d4;"></div>
+                <div class="color-option" data-color="#3b82f6" style="background: #3b82f6;"></div>
+                <div class="color-option" data-color="#64748b" style="background: #64748b;"></div>
+                <div class="color-option" data-color="#78716c" style="background: #78716c;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 폰트 설정 모달 -->
+    <div class="modal-overlay" id="fontModal">
+        <div class="modal-content">
+            <div class="modal-handle"></div>
+            <div class="modal-header">
+                <h3 class="modal-title">🔤 폰트 설정</h3>
+                <button class="btn btn-icon btn-ghost modal-close">✕</button>
+            </div>
+            <div class="input-group">
+                <label class="input-label">Google Fonts URL 또는 @import 코드</label>
+                <textarea class="input-field" id="fontImportInput" placeholder="예: @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap');"></textarea>
+            </div>
+            <div class="input-group">
+                <label class="input-label">폰트 패밀리 이름</label>
+                <input type="text" class="input-field" id="fontFamilyInput" placeholder="예: 'Noto Sans KR'">
+            </div>
+            <button class="btn btn-primary btn-block" id="applyFontBtn">적용</button>
+        </div>
+    </div>
+
+    <!-- 작품 업로드 모달 -->
+    <div class="modal-overlay" id="uploadModal">
+        <div class="modal-content">
+            <div class="modal-handle"></div>
+            <div class="modal-header">
+                <h3 class="modal-title">📤 작품 업로드</h3>
+                <button class="btn btn-icon btn-ghost modal-close">✕</button>
+            </div>
+            <div class="input-group">
+                <label class="input-label">이미지 선택</label>
+                <input type="file" class="input-field" id="artworkFileInput" accept="image/*">
+            </div>
+            <div id="uploadPreview" style="margin-bottom: var(--space-md); display: none;">
+                <img id="previewImage" style="width: 100%; border-radius: var(--radius-md);">
+            </div>
+            <div class="input-group">
+                <label class="input-label">제목</label>
+                <input type="text" class="input-field" id="artworkTitleInput" placeholder="작품 제목">
+            </div>
+            <div class="input-group">
+                <label class="input-label">메모</label>
+                <textarea class="input-field" id="artworkNoteInput" placeholder="작업 과정이나 느낀 점을 기록해보세요"></textarea>
+            </div>
+            <div class="input-group">
+                <label class="input-label">카테고리</label>
+                <select class="input-field" id="artworkCategoryInput">
+                    <option value="practice">연습</option>
+                    <option value="study">스터디</option>
+                    <option value="personal">개인 작업</option>
+                    <option value="commission">커미션</option>
+                </select>
+            </div>
+            <button class="btn btn-primary btn-block" id="saveArtworkBtn">저장</button>
+        </div>
+    </div>
+
+    <!-- 작품 상세 모달 -->
+    <div class="modal-overlay modal-fullscreen" id="artworkDetailModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="btn btn-icon btn-ghost modal-close">✕</button>
+                <h3 class="modal-title" id="artworkDetailTitle">작품 상세</h3>
+                <button class="btn btn-icon btn-ghost" id="deleteArtworkBtn">🗑️</button>
+            </div>
+            <div id="artworkDetailContent">
+                <!-- JavaScript로 동적 생성 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 실력 수정 모달 -->
+    <div class="modal-overlay" id="editSkillsModal">
+        <div class="modal-content" style="max-height: 80vh;">
+            <div class="modal-handle"></div>
+            <div class="modal-header">
+                <h3 class="modal-title">📝 실력 자가진단 수정</h3>
+                <button class="btn btn-icon btn-ghost modal-close">✕</button>
+            </div>
+            <div id="editSkillsContent" style="overflow-y: auto; max-height: 60vh;">
+                <!-- JavaScript로 동적 생성 -->
+            </div>
+            <button class="btn btn-primary btn-block" id="saveSkillsBtn" style="margin-top: var(--space-md);">저장</button>
+        </div>
+    </div>
+
+    <!-- 알림 시간 설정 모달 -->
+    <div class="modal-overlay" id="reminderModal">
+        <div class="modal-content">
+            <div class="modal-handle"></div>
+            <div class="modal-header">
+                <h3 class="modal-title">⏰ 알림 시간 설정</h3>
+                <button class="btn btn-icon btn-ghost modal-close">✕</button>
+            </div>
+            <div class="input-group">
+                <label class="input-label">알림 시간</label>
+                <input type="time" class="input-field" id="reminderTimeInput" value="09:00">
+            </div>
+            <button class="btn btn-primary btn-block" id="saveReminderBtn">저장</button>
+        </div>
+    </div>
+
+    <!-- 확인 모달 -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal-content">
+            <div class="modal-handle"></div>
+            <div style="text-align: center; padding: var(--space-lg) 0;">
+                <div style="font-size: 48px; margin-bottom: var(--space-md);" id="confirmIcon">⚠️</div>
+                <h3 class="modal-title" id="confirmTitle">확인</h3>
+                <p style="color: var(--text-secondary); margin: var(--space-md) 0;" id="confirmMessage">정말 진행하시겠습니까?</p>
+            </div>
+            <div style="display: flex; gap: var(--space-md);">
+                <button class="btn btn-secondary btn-block modal-close">취소</button>
+                <button class="btn btn-primary btn-block" id="confirmActionBtn">확인</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+/* ============================================
+   ArtQuest - 그림 공부 게이미피케이션 앱
+   메인 JavaScript 모듈
+
+   구조:
+   1. 유틸리티 모듈
+   2. 상태 관리 모듈
+   3. 스토리지 모듈
+   4. API 서비스 모듈
+   5. UI 컨트롤러 모듈
+   6. 기능별 모듈들
+   7. 앱 초기화
+   ============================================ */
+
+// ============================================
+// 1. 유틸리티 모듈
+// - 공통으로 사용되는 헬퍼 함수들
+// ============================================
+const Utils = (() => {
+    /**
+     * 날짜를 한국어 형식으로 포맷
+     * @param {Date} date - 포맷할 날짜
+     * @returns {string} 포맷된 날짜 문자열
+     */
+    const formatDate = (date) => {
+        const options = {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            weekday: 'long'
+        };
+        return date.toLocaleDateString('ko-KR', options);
+    };
+
+    /**
+     * 시간을 MM:SS 형식으로 포맷
+     * @param {number} seconds - 초 단위 시간
+     * @returns {string} 포맷된 시간 문자열
+     */
+    const formatTime = (seconds) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    /**
+     * 고유 ID 생성
+     * @returns {string} 고유 ID
+     */
+    const generateId = () => {
+        return Date.now().toString(36) + Math.random().toString(36).substr(2);
+    };
+
+    /**
+     * 디바운스 함수
+     * @param {Function} func - 디바운스할 함수
+     * @param {number} wait - 대기 시간 (ms)
+     * @returns {Function} 디바운스된 함수
+     */
+    const debounce = (func, wait) => {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    };
+
+    /**
+     * 오늘 날짜의 시작 시간 반환
+     * @returns {Date} 오늘 00:00:00
+     */
+    const getToday = () => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return today;
+    };
+
+    /**
+     * 이번 주의 시작일 반환 (월요일 기준)
+     * @returns {Date} 이번 주 월요일
+     */
+    const getWeekStart = () => {
+        const today = new Date();
+        const day = today.getDay();
+        const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+        const monday = new Date(today.setDate(diff));
+        monday.setHours(0, 0, 0, 0);
+        return monday;
+    };
+
+    /**
+     * 인사말 생성
+     * @returns {object} 이모지와 인사말
+     */
+    const getGreeting = () => {
+        const hour = new Date().getHours();
+        if (hour < 6) return { emoji: '🌙', text: '늦은 밤이에요' };
+        if (hour < 12) return { emoji: '🌅', text: '좋은 아침이에요' };
+        if (hour < 18) return { emoji: '☀️', text: '좋은 오후예요' };
+        return { emoji: '🌆', text: '좋은 저녁이에요' };
+    };
+
+    /**
+     * 레벨 계산
+     * @param {number} points - 총 포인트
+     * @returns {number} 레벨
+     */
+    const calculateLevel = (points) => {
+        return Math.floor(points / 100) + 1;
+    };
+
+    return {
+        formatDate,
+        formatTime,
+        generateId,
+        debounce,
+        getToday,
+        getWeekStart,
+        getGreeting,
+        calculateLevel
+    };
+})();
+
+// ============================================
+// 2. 상태 관리 모듈
+// - 앱의 전역 상태 관리
+// ============================================
+const AppState = (() => {
+    // 초기 상태 정의
+    const initialState = {
+        // 사용자 정보
+        user: {
+            apiKey: '',
+            isOnboarded: false,
+            skills: {
+                basic: 1,      // 기초 드로잉 (1: 초급, 2: 중급, 3: 상급)
+                anatomy: 1,    // 인체
+                perspective: 1, // 원근법
+                shading: 1,    // 명암
+                color: 1,      // 색채
+                composition: 1  // 구도
+            }
+        },
+
+        // 게이미피케이션
+        gamification: {
+            points: 0,
+            streak: 0,
+            lastStudyDate: null,
+            completedTasks: 0,
+            studyDays: 0,
+            focusSessions: 0,
+            totalFocusMinutes: 0
+        },
+
+        // 과제
+        tasks: {
+            today: [],
+            history: []
+        },
+
+        // 갤러리
+        gallery: [],
+
+        // 설정
+        settings: {
+            theme: 'light',
+            accentColor: '#6366f1',
+            customFont: null,
+            notifications: false,
+            reminderTime: '09:00'
+        },
+
+        // 타이머
+        timer: {
+            duration: 25 * 60,
+            remaining: 25 * 60,
+            isRunning: false,
+            mode: 'focus' // 'focus' | 'break'
+        },
+
+        // AI 분석 결과
+        analysis: {
+            strengths: [],
+            weaknesses: [],
+            tips: [],
+            lastUpdated: null
+        },
+
+        // 채팅 기록
+        chatHistory: []
+    };
+
+    // 상태 저장소
+    let state = JSON.parse(JSON.stringify(initialState));
+
+    // 구독자 목록
+    const subscribers = [];
+
+    /**
+     * 상태 가져오기
+     * @param {string} path - 점 표기법 경로 (예: 'user.skills.basic')
+     * @returns {any} 상태 값
+     */
+    const get = (path) => {
+        if (!path) return state;
+        return path.split('.').reduce((obj, key) => obj?.[key], state);
+    };
+
+    /**
+     * 상태 설정
+     * @param {string} path - 점 표기법 경로
+     * @param {any} value - 설정할 값
+     */
+    const set = (path, value) => {
+        const keys = path.split('.');
+        const lastKey = keys.pop();
+        const target = keys.reduce((obj, key) => {
+            if (!obj[key]) obj[key] = {};
+            return obj[key];
+        }, state);
+        target[lastKey] = value;
+
+        // 구독자들에게 알림
+        notifySubscribers(path, value);
+
+        // 로컬 스토리지에 저장
+        Storage.save();
+    };
+
+    /**
+     * 상태 구독
+     * @param {Function} callback - 상태 변경 시 호출될 콜백
+     * @returns {Function} 구독 취소 함수
+     */
+    const subscribe = (callback) => {
+        subscribers.push(callback);
+        return () => {
+            const index = subscribers.indexOf(callback);
+            if (index > -1) subscribers.splice(index, 1);
+        };
+    };
+
+    /**
+     * 구독자들에게 변경 알림
+     * @param {string} path - 변경된 경로
+     * @param {any} value - 새 값
+     */
+    const notifySubscribers = (path, value) => {
+        subscribers.forEach(callback => callback(path, value, state));
+    };
+
+    /**
+     * 전체 상태 교체 (로드 시 사용)
+     * @param {object} newState - 새 상태
+     */
+    const replaceState = (newState) => {
+        state = { ...initialState, ...newState };
+    };
+
+    /**
+     * 상태 초기화
+     */
+    const reset = () => {
+        state = JSON.parse(JSON.stringify(initialState));
+        Storage.save();
+    };
+
+    return {
+        get,
+        set,
+        subscribe,
+        replaceState,
+        reset,
+        getFullState: () => state
+    };
+})();
+
+// ============================================
+// 3. 스토리지 모듈
+// - LocalStorage를 통한 데이터 영속화
+// ============================================
+const Storage = (() => {
+    const STORAGE_KEY = 'artquest_data';
+
+    /**
+     * 상태를 LocalStorage에 저장
+     */
+    const save = () => {
+        try {
+            const state = AppState.getFullState();
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch (error) {
+            console.error('저장 실패:', error);
+        }
+    };
+
+    /**
+     * LocalStorage에서 상태 로드
+     * @returns {boolean} 로드 성공 여부
+     */
+    const load = () => {
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                const state = JSON.parse(saved);
+                AppState.replaceState(state);
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('로드 실패:', error);
+            return false;
+        }
+    };
+
+    /**
+     * 모든 데이터 삭제
+     */
+    const clear = () => {
+        localStorage.removeItem(STORAGE_KEY);
+    };
+
+    /**
+     * 갤러리 이미지 저장 (Base64)
+     * @param {File} file - 이미지 파일
+     * @returns {Promise<string>} Base64 문자열
+     */
+    const saveImage = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    };
+
+    return {
+        save,
+        load,
+        clear,
+        saveImage
+    };
+})();
+
+// ============================================
+// 4. API 서비스 모듈
+// - Gemini API 통신 처리
+// ============================================
+const APIService = (() => {
+    const API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+
+    /**
+     * Gemini API 호출
+     * @param {string} prompt - 프롬프트
+     * @returns {Promise<string>} AI 응답
+     */
+    const callGemini = async (prompt) => {
+        const apiKey = AppState.get('user.apiKey');
+        if (!apiKey) {
+            throw new Error('API 키가 설정되지 않았습니다.');
+        }
+
+        try {
+            const response = await fetch(`${API_BASE}?key=${apiKey}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [{
+                            text: prompt
+                        }]
+                    }],
+                    generationConfig: {
+                        temperature: 0.7,
+                        topK: 40,
+                        topP: 0.95,
+                        maxOutputTokens: 2048,
+                    }
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`API 오류: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.candidates?.[0]?.content?.parts?.[0]?.text || '응답을 받지 못했습니다.';
+        } catch (error) {
+            console.error('API 호출 실패:', error);
+            throw error;
+        }
+    };
+
+    /**
+     * 맞춤 과제 생성 요청
+     * @returns {Promise<Array>} 과제 목록
+     */
+    const generateTasks = async () => {
+        const skills = AppState.get('user.skills');
+        const dayOfWeek = ['일', '월', '화', '수', '목', '금', '토'][new Date().getDay()];
+
+        const prompt = `당신은 그림 학습 코치입니다. 다음 조건에 맞는 오늘의 학습 과제를 생성해주세요.
+
+사용자 실력 (1: 초급, 2: 중급, 3: 상급):
+- 기초 드로잉: ${skills.basic}
+- 인체: ${skills.anatomy}
+- 원근법: ${skills.perspective}
+- 명암: ${skills.shading}
+- 색채: ${skills.color}
+- 구도: ${skills.composition}
+
+오늘: ${dayOfWeek}요일
+
+요구사항:
+1. 실력 수준에 맞는 적절한 난이도의 과제 5-6개 생성
+2. 다양한 카테고리를 포함
+3. 구체적이고 실행 가능한 과제
+4. ADHD 친화적으로 작은 단위로 분할
+5. 각 과제에 예상 소요 시간 포함
+
+다음 JSON 형식으로만 응답해주세요:
+[
+  {
+    "id": "고유ID",
+    "title": "과제 제목",
+    "description": "상세 설명",
+    "category": "basic|anatomy|perspective|shading|color|composition",
+    "duration": 15,
+    "points": 10,
+    "difficulty": "easy|medium|hard"
+  }
+]`;
+
+        try {
+            const response = await callGemini(prompt);
+            // JSON 파싱
+            const jsonMatch = response.match(/\[[\s\S]*\]/);
+            if (jsonMatch) {
+                const tasks = JSON.parse(jsonMatch[0]);
+                return tasks.map(task => ({
+                    ...task,
+                    id: Utils.generateId(),
+                    completed: false,
+                    createdAt: new Date().toISOString()
+                }));
+            }
+            throw new Error('과제 파싱 실패');
+        } catch (error) {
+            console.error('과제 생성 실패:', error);
+            // 폴백 과제 반환
+            return getDefaultTasks();
+        }
+    };
+
+    /**
+     * 기본 과제 (API 실패 시 사용)
+     * @returns {Array} 기본 과제 목록
+     */
+    const getDefaultTasks = () => {
+        const skills = AppState.get('user.skills');
+        const defaultTasks = [
+            {
+                id: Utils.generateId(),
+                title: '워밍업 스케치',
+                description: '5분간 자유롭게 선 긋기 연습을 해보세요.',
+                category: 'basic',
+                duration: 5,
+                points: 10,
+                difficulty: 'easy',
+                completed: false,
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: Utils.generateId(),
+                title: '도형 드로잉',
+                description: '기본 도형(원, 사각형, 삼각형)을 다양한 각도에서 그려보세요.',
+                category: 'basic',
+                duration: 15,
+                points: 10,
+                difficulty: 'easy',
+                completed: false,
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: Utils.generateId(),
+                title: '손 스케치',
+                description: '자신의 손을 3가지 포즈로 스케치해보세요.',
+                category: 'anatomy',
+                duration: 20,
+                points: 15,
+                difficulty: 'medium',
+                completed: false,
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: Utils.generateId(),
+                title: '명암 연습',
+                description: '구체에 명암을 넣어 입체감을 표현해보세요.',
+                category: 'shading',
+                duration: 15,
+                points: 10,
+                difficulty: 'medium',
+                completed: false,
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: Utils.generateId(),
+                title: '레퍼런스 모작',
+                description: '좋아하는 아티스트의 작품을 참고하여 모작해보세요.',
+                category: 'composition',
+                duration: 30,
+                points: 20,
+                difficulty: 'hard',
+                completed: false,
+                createdAt: new Date().toISOString()
+            }
+        ];
+
+        return defaultTasks;
+    };
+
+    /**
+     * 실력 분석 요청
+     * @returns {Promise<object>} 분석 결과
+     */
+    const analyzeSkills = async () => {
+        const skills = AppState.get('user.skills');
+        const gamification = AppState.get('gamification');
+
+        const prompt = `당신은 그림 학습 분석 전문가입니다. 다음 사용자의 실력을 분석해주세요.
+
+실력 수준 (1: 초급, 2: 중급, 3: 상급):
+- 기초 드로잉: ${skills.basic}
+- 인체: ${skills.anatomy}
+- 원근법: ${skills.perspective}
+- 명암: ${skills.shading}
+- 색채: ${skills.color}
+- 구도: ${skills.composition}
+
+학습 통계:
+- 총 포인트: ${gamification.points}
+- 완료한 과제: ${gamification.completedTasks}
+- 연속 학습일: ${gamification.streak}
+
+다음 JSON 형식으로만 응답해주세요:
+{
+  "strengths": [
+    {"category": "카테고리명", "description": "강점 설명"}
+  ],
+  "weaknesses": [
+    {"category": "카테고리명", "description": "개선점 설명", "tip": "구체적인 학습 팁"}
+  ],
+  "overallAdvice": "전체적인 학습 조언 (2-3문장)"
+}`;
+
+        try {
+            const response = await callGemini(prompt);
+            const jsonMatch = response.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                return JSON.parse(jsonMatch[0]);
+            }
+            throw new Error('분석 파싱 실패');
+        } catch (error) {
+            console.error('분석 실패:', error);
+            return getDefaultAnalysis();
+        }
+    };
+
+    /**
+     * 기본 분석 결과
+     * @returns {object} 기본 분석
+     */
+    const getDefaultAnalysis = () => {
+        const skills = AppState.get('user.skills');
+        const categoryNames = {
+            basic: '기초 드로잉',
+            anatomy: '인체',
+            perspective: '원근법',
+            shading: '명암',
+            color: '색채',
+            composition: '구도'
+        };
+
+        const sorted = Object.entries(skills).sort((a, b) => b[1] - a[1]);
+        const strongest = sorted[0];
+        const weakest = sorted[sorted.length - 1];
+
+        return {
+            strengths: [
+                {
+                    category: categoryNames[strongest[0]],
+                    description: `${categoryNames[strongest[0]]} 영역에서 좋은 기초를 가지고 계시네요!`
+                }
+            ],
+            weaknesses: [
+                {
+                    category: categoryNames[weakest[0]],
+                    description: `${categoryNames[weakest[0]]} 영역의 추가 학습이 도움이 될 것 같아요.`,
+                    tip: '매일 15분씩 관련 연습을 해보세요.'
+                }
+            ],
+            overallAdvice: '꾸준한 연습이 실력 향상의 핵심입니다. 매일 조금씩이라도 그리는 습관을 들이세요.'
+        };
+    };
+
+    /**
+     * 학습 자료 추천 요청
+     * @param {string} category - 카테고리
+     * @returns {Promise<Array>} 추천 자료 목록
+     */
+    const getResourceRecommendations = async (category = 'all') => {
+        const skills = AppState.get('user.skills');
+
+        const prompt = `당신은 그림 학습 자료 큐레이터입니다. 다음 사용자에게 맞는 YouTube 영상이나 학습 자료를 추천해주세요.
+
+실력 수준:
+${JSON.stringify(skills, null, 2)}
+
+${category !== 'all' ? `특히 "${category}" 카테고리에 집중해주세요.` : ''}
+
+다음 JSON 형식으로만 응답해주세요:
+[
+  {
+    "title": "자료 제목",
+    "type": "video|article|course",
+    "category": "basic|anatomy|perspective|shading|color|composition",
+    "description": "간단한 설명",
+    "url": "https://youtube.com/...",
+    "duration": "예상 학습 시간"
+  }
+]
+
+주의: 실제로 존재하는 유명한 무료 학습 자료만 추천해주세요.`;
+
+        try {
+            const response = await callGemini(prompt);
+            const jsonMatch = response.match(/\[[\s\S]*\]/);
+            if (jsonMatch) {
+                return JSON.parse(jsonMatch[0]);
+            }
+            throw new Error('추천 파싱 실패');
+        } catch (error) {
+            console.error('추천 실패:', error);
+            return getDefaultResources();
+        }
+    };
+
+    /**
+     * 기본 학습 자료
+     * @returns {Array} 기본 자료 목록
+     */
+    const getDefaultResources = () => [
+        {
+            title: 'Proko - 인체 드로잉 기초',
+            type: 'video',
+            category: 'anatomy',
+            description: '인체 비율과 기본 구조를 배우는 인기 강좌',
+            url: '
