@@ -141,6 +141,23 @@ class StorageManager {
   }
 
     /**
+   * 주간 목표 마지막 갱신 날짜 확인
+   */
+  getWeeklyGoalsRefreshDate() {
+    return this.get('weekly_goals_refresh_date');
+  }
+
+  /**
+   * 주간 목표 갱신 날짜 기록
+   */
+  recordWeeklyGoalsRefresh() {
+    const now = new Date().toISOString();
+    this.set('weekly_goals_refresh_date', now);
+    return now;
+  }
+
+
+    /**
    * 커스텀 링크 관리
    */
   getCustomLinks() {
