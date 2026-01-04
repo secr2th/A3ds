@@ -678,28 +678,47 @@
                 </div>
             </section>
 
-            <!-- 폰트 설정 -->
+                        <!-- 폰트 설정 -->
             <section class="section">
                 <h2>✍️ 폰트</h2>
                 <div class="setting-item">
-                    <label>기본 폰트</label>
+                    <label>현재 적용된 폰트</label>
                     <select id="font-select" onchange="app.theme.changeFont()">
-                        <option value="Pretendard">Pretendard (기본)</option>
-                        <option value="Noto Sans KR">Noto Sans KR</option>
-                        <option value="Nanum Gothic">나눔고딕</option>
-                        <option value="Nanum Myeongjo">나눔명조</option>
+                        <!-- 동적 생성됨 -->
                     </select>
                 </div>
+
+                <!-- 👇 변경된 부분 -->
                 <div class="setting-item">
-                    <label>커스텀 폰트 추가 (Google Fonts)</label>
-                    <div class="input-group">
-                        <input type="text" id="custom-font-input"
-                               placeholder="예: Roboto">
-                        <button class="btn-secondary" onclick="app.theme.addCustomFont()">추가</button>
+                    <label>커스텀 웹폰트 추가</label>
+                    <small style="display: block; margin-bottom: 12px; color: var(--text-secondary);">
+                        @font-face CSS 코드를 입력하세요
+                    </small>
+                    <textarea id="custom-font-css"
+                              rows="6"
+                              placeholder="@font-face {
+  font-family: 'Paperozi';
+  src: url('https://...') format('woff2');
+  font-weight: 100;
+}"
+                              style="width: 100%; font-family: monospace; font-size: 13px;"></textarea>
+                    <input type="text"
+                           id="custom-font-name"
+                           placeholder="폰트 패밀리명 (예: Paperozi)"
+                           style="margin-top: 12px;">
+                    <button class="btn-secondary" onclick="app.theme.addCustomFontFromCSS()" style="margin-top: 8px;">
+                        추가
+                    </button>
+                </div>
+
+                <div class="setting-item">
+                    <label>등록된 커스텀 폰트</label>
+                    <div id="custom-fonts-list" style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+                        <!-- 동적 생성됨 -->
                     </div>
-                    <small>Google Fonts에서 사용 가능한 폰트명을 입력하세요</small>
                 </div>
             </section>
+
 
             <!-- 데이터 관리 -->
             <section class="section">
