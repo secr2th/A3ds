@@ -528,6 +528,19 @@
   animation: slideUp var(--transition-base);
 }
 
+/* 온보딩 모달은 더 큰 사이즈 */
+#onboarding-modal .modal-content {
+  max-width: 800px;
+  max-height: 85vh;
+}
+
+/* 평가 그리드가 있을 때는 스크롤 활성화 */
+.assessment-grid {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
 @keyframes slideUp {
   from {
     opacity: 0;
