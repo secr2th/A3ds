@@ -175,6 +175,9 @@ class ArtQuestApp {
         this.onboarding.currentStep = 'assessment';
       },
 
+            /**
+       * 실력 진단 완료
+       */
       completeAssessment: async () => {
         const categories = ['basic', 'anatomy', 'perspective', 'shading', 'color', 'composition'];
         const assessment = {};
@@ -190,7 +193,7 @@ class ArtQuestApp {
         });
 
         if (!allSelected) {
-          this.toast.show('모든 항목을 선택해주세요', 'warning');
+          window.app.toast.show('모든 항목을 선택해주세요', 'warning');
           return;
         }
 
@@ -201,19 +204,27 @@ class ArtQuestApp {
 
         try {
           const analysis = await gemini.analyzeAssessment(assessment);
+
+          // 👇 결과 모달 표시 추가
+          window.app.showAssessmentResult(assessment, analysis);
+
           await this.onboarding.generateInitialData(assessment, analysis);
 
+          // 온보딩 모달은 닫기
+          const modal = document.getElementById('onboarding-modal');
           modal.classList.add('hidden');
-          this.toast.show('🎉 환영합니다! 학습을 시작해볼까요?', 'success');
-          await this.initializeApp();
+
+          window.app.toast.show('🎉 환영합니다! 학습을 시작해볼까요?', 'success');
+          await window.app.initializeApp();
 
         } catch (error) {
           console.error('분석 오류:', error);
-          this.toast.show('분석 실패. API 키를 확인해주세요.', 'error');
+          window.app.toast.show('분석 실패. API 키를 확인해주세요.', 'error');
           document.getElementById('step-analyzing')?.classList.add('hidden');
           document.getElementById('step-api')?.classList.remove('hidden');
         }
       },
+
 
       generateInitialData: async (assessment, analysis) => {
         const userData = storage.getUserData();
