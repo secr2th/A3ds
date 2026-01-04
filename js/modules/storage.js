@@ -140,6 +140,34 @@ class StorageManager {
     return userData.streak;
   }
 
+    /**
+   * 커스텀 링크 관리
+   */
+  getCustomLinks() {
+    return this.get('custom_links') || [];
+  }
+
+  setCustomLinks(links) {
+    return this.set('custom_links', links);
+  }
+
+  addCustomLink(link) {
+    const links = this.getCustomLinks();
+    links.push({
+      id: UTILS.generateId(),
+      ...link,
+      createdAt: new Date().toISOString()
+    });
+    return this.setCustomLinks(links);
+  }
+
+  deleteCustomLink(linkId) {
+    const links = this.getCustomLinks();
+    const filtered = links.filter(l => l.id !== linkId);
+    return this.setCustomLinks(filtered);
+  }
+
+
   /**
    * 과제 데이터 관리
    */
