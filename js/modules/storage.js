@@ -167,6 +167,25 @@ class StorageManager {
     return this.setCustomLinks(filtered);
   }
 
+    /**
+   * 오늘 출석 여부 확인
+   */
+  isAttendedToday() {
+    const lastAttendance = this.get('last_attendance_date');
+    const today = UTILS.formatDate(new Date());
+    return lastAttendance === today;
+  }
+
+  /**
+   * 출석 기록
+   */
+  recordAttendance() {
+    const today = UTILS.formatDate(new Date());
+    this.set('last_attendance_date', today);
+    return today;
+  }
+
+
 
   /**
    * 과제 데이터 관리
