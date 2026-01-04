@@ -1,0 +1,46 @@
+/**
+ * 테마 변형
+ * - 컬러 테마별 CSS 변수 오버라이드
+ */
+
+/* Blue Theme */
+[data-color="blue"] {
+  --color-primary: #3b82f6;
+  --color-primary-dark: #2563eb;
+  --color-primary-light: #60a5fa;
+}
+
+/* Purple Theme */
+[data-color="purple"] {
+  --color-primary: #a855f7;
+  --color-primary-dark: #9333ea;
+  --color-primary-light: #c084fc;
+}
+
+/* Pink Theme */
+[data-color="pink"] {
+  --color-primary: #ec4899;
+  --color-primary-dark: #db2777;
+  --color-primary-light: #f472b6;
+}
+
+/* Green Theme */
+[data-color="green"] {
+  --color-primary: #10b981;
+  --color-primary-dark: #059669;
+  --color-primary-light: #34d399;
+}
+
+/* Orange Theme */
+[data-color="orange"] {
+  --color-primary: #f59e0b;
+  --color-primary-dark: #d97706;
+  --color-primary-light: #fbbf24;
+}
+
+/* Indigo Theme (기본값) */
+[data-color="indigo"] {
+  --color-primary: #6366f1;
+  --color-primary-dark: #4f46e5;
+  --color-primary-light: #818cf8;
+}
