@@ -11,7 +11,7 @@ class GeminiAPI {
   constructor() {
     this.apiKey = null;
     // 현재 가장 빠르고 안정적인 최신 모델 설정 (2.5는 존재하지 않아 1.5 Flash로 설정)
-    this.model = 'gemini-1.5-flash';
+    this.model = 'gemini-2.5-flash';
     this.baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models';
   }
 
