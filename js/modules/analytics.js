@@ -15,13 +15,37 @@ class AnalyticsManager {
     this.chartData = null;
   }
 
-  /**
+   /**
    * 초기화
    */
   init() {
     this.render();
-    this.refreshAIFeedback();
+
+    // 👇 자동 새로고침 제거, 캐시된 피드백만 표시
+    this.displayCachedFeedback();
+    // this.refreshAIFeedback(); // 기존 코드 주석 처리
   }
+
+  /**
+   * 캐시된 피드백 표시
+   */
+  displayCachedFeedback() {
+    const feedbackEl = document.getElementById('ai-feedback-content');
+    if (!feedbackEl) return;
+
+    const cachedFeedback = storage.get('ai_feedback_cache');
+
+    if (cachedFeedback && cachedFeedback.text) {
+      feedbackEl.innerHTML = `<p style="color: rgba(255,255,255,0.95); line-height: 1.6;">${cachedFeedback.text}</p>`;
+    } else {
+      feedbackEl.innerHTML = `
+        <p style="color: rgba(255,255,255,0.9);">
+          새로고침 버튼을 눌러 AI 피드백을 받아보세요! 💪
+        </p>
+      `;
+    }
+  }
+
 
   /**
    * 전체 통계 가져오기
