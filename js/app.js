@@ -217,10 +217,9 @@ class ArtQuestApp {
           modal.classList.add('hidden');
           
           // Show result popup MBTI-style
+          // Store that we need to init app after modal closes
+          window.app._pendingInitAfterAssessment = true;
           this.showAssessmentResult(analysis, assessment);
-
-          // Initialize app after showing result
-          await this.initializeApp();
 
         } catch (error) {
           console.error('분석 오류:', error);
@@ -812,6 +811,12 @@ class ArtQuestApp {
     const modal = document.getElementById('assessment-result-modal');
     if (modal) modal.classList.add('hidden');
     this.toast.show('🎉 환영합니다! 학습을 시작해볼까요?', 'success');
+    
+    // Initialize app if this was called after assessment
+    if (window.app._pendingInitAfterAssessment) {
+      window.app._pendingInitAfterAssessment = false;
+      this.initializeApp();
+    }
   }
 }
 
