@@ -320,6 +320,69 @@ class ArtQuestApp {
     setContent('points-to-next', pointsPerLevel - currentLevelPoints);
   }
 
+    /**
+   * 커스텀 링크 추가
+   */
+  addCustomLink() {
+    const title = prompt('링크 제목을 입력하세요 (예: 김라면 채널):');
+    if (!title) return;
+
+    const url = prompt('URL을 입력하세요:');
+    if (!url) return;
+
+    // 아이콘 선택
+    const iconOptions = ['🎥', '🐦', '📺', '📱', '🌐', '📚', '✏️', '🎨'];
+    const iconPrompt = `아이콘을 선택하세요 (번호 입력):\n${iconOptions.map((icon, i) => `${i + 1}. ${icon}`).join('\n')}`;
+    const iconIndex = parseInt(prompt(iconPrompt)) - 1;
+    const icon = iconOptions[iconIndex] || '🔗';
+
+    storage.addCustomLink({ title, url, icon });
+    this.toast.show('✅ 링크가 추가되었어요!', 'success');
+    this.updateCustomLinks();
+  }
+
+  /**
+   * 커스텀 링크 삭제
+   */
+  deleteCustomLink(linkId) {
+    if (confirm('이 링크를 삭제하시겠어요?')) {
+      storage.deleteCustomLink(linkId);
+      this.toast.show('🗑 링크가 삭제되었어요', 'success');
+      this.updateCustomLinks();
+    }
+  }
+
+  /**
+   * 커스텀 링크 렌더링
+   */
+  updateCustomLinks() {
+    const links = storage.getCustomLinks();
+    const container = document.getElementById('custom-links');
+    if (!container) return;
+
+    if (links.length === 0) {
+      container.innerHTML = `
+        <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-secondary);">
+          <p style="font-size: 48px; margin-bottom: 16px;">🔗</p>
+          <p>자주 가는 유튜브 채널이나 SNS를 추가해보세요</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = links.map(link => `
+      <a href="${link.url}" target="_blank" class="custom-link-card">
+        <div class="custom-link-delete" onclick="event.preventDefault(); event.stopPropagation(); app.deleteCustomLink('${link.id}')">
+          ✕
+        </div>
+        <div class="custom-link-icon">${link.icon}</div>
+        <div class="custom-link-title">${link.title}</div>
+        <div class="custom-link-url">${link.url}</div>
+      </a>
+    `).join('');
+  }
+
+
   /**
    * 오늘의 과제 업데이트
    */
