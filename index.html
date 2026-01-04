@@ -259,7 +259,13 @@
             <section class="section">
                 <div class="section-header">
                     <h2>📝 오늘의 과제</h2>
-                    <span class="badge" id="today-task-count">0/0</span>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span class="badge" id="today-task-count">0/0</span>
+                        <button class="btn-text" onclick="app.dashboard.checkAttendance()" 
+                                style="padding: 6px 12px; font-size: 14px;">
+                            📅 출석
+                        </button>
+                    </div>
                 </div>
                 <div id="today-tasks" class="task-list">
                     <!-- 동적으로 생성됨 -->
@@ -270,9 +276,14 @@
             <section class="section">
                 <div class="section-header">
                     <h2>🎯 이번 주 목표</h2>
-                    <button class="btn-text" onclick="app.router.navigate('tasks')">전체보기</button>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-text" onclick="app.dashboard.refreshWeeklyGoals()">
+                            🔄 갱신
+                        </button>
+                        <button class="btn-text" onclick="app.router.navigate('tasks')">전체보기</button>
+                    </div>
                 </div>
-                <div class="weekly-goals">
+                <div class="weekly-goals" id="dashboard-weekly-goals">
                     <div class="goal-card" id="weekly-goal-1">
                         <div class="goal-icon">📐</div>
                         <div class="goal-content">
@@ -360,6 +371,10 @@
                         </div>
                     </div>
                 </div>
+                <button class="btn-secondary" onclick="app.tasks.generateWeeklyGoals()" 
+                        style="width: 100%; margin-bottom: 16px;">
+                    🔄 이번 주 목표 갱신
+                </button>
                 <div id="weekly-task-list" class="task-list detailed">
                     <!-- 동적 생성 -->
                 </div>
@@ -817,6 +832,16 @@
             <div class="spinner" style="margin: 0 auto 20px;"></div>
             <h3 style="margin-bottom: 12px;">🤖 AI가 답변을 생성중입니다...</h3>
             <p style="color: var(--text-secondary); font-size: 14px;">잠시만 기다려주세요</p>
+        </div>
+    </div>
+
+    <!-- Assessment Result Modal -->
+    <div id="assessment-result-modal" class="modal hidden">
+        <div class="modal-content" style="max-width: 600px;">
+            <button class="close-btn" onclick="app.closeAssessmentResult()">✕</button>
+            <div id="assessment-result-content">
+                <!-- 동적 생성 -->
+            </div>
         </div>
     </div>
 
