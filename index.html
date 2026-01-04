@@ -255,16 +255,20 @@
                 </div>
             </header>
 
-            <!-- 오늘의 과제 -->
+                        <!-- 오늘의 과제 -->
             <section class="section">
                 <div class="section-header">
                     <h2>📝 오늘의 과제</h2>
-                    <span class="badge" id="today-task-count">0/0</span>
+                    <!-- 👇 출석 버튼 추가 -->
+                    <button class="btn-primary small" onclick="app.tasks.attendToday()" id="attend-btn">
+                        ✓ 출석
+                    </button>
                 </div>
                 <div id="today-tasks" class="task-list">
                     <!-- 동적으로 생성됨 -->
                 </div>
             </section>
+
 
                         <section class="section">
                 <div class="section-header">
