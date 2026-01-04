@@ -5,31 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#6366f1">
     <title>ArtQuest - AI 그림 학습 코치</title>
-
-    <!-- PWA 설정 -->
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-    <!-- CSS -->
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/themes.css">
-
-    <!-- 구글 폰트 기본 로드 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FIX 6: 커스텀 폰트 CSS가 주입될 위치 -->
+    <style id="custom-font-styles"></style>
 </head>
 <body>
-    <!--
-        메인 앱 컨테이너
-        - 모든 화면이 이 안에서 라우팅됨
-        - SPA 방식으로 동작
-    -->
     <div id="app">
-        <!-- 로딩 스피너 -->
         <div id="loading" class="loading-screen">
             <div class="spinner"></div>
             <p>ArtQuest를 준비하고 있어요...</p>
@@ -38,287 +28,158 @@
 
     <!--
         온보딩 모달
-        - 최초 실행 시 API 키 입력 및 실력 진단
     -->
     <div id="onboarding-modal" class="modal hidden">
-        <div class="modal-content">
+        <!-- FIX 1: 팝업 크기 조절을 위해 modal-content에 onboarding 클래스 추가 및 닫기 버튼 추가 -->
+        <div class="modal-content onboarding">
+            <button class="close-btn" onclick="document.getElementById('onboarding-modal').classList.add('hidden')">✕</button>
             <h2>🎨 ArtQuest에 오신 것을 환영합니다!</h2>
             <p>AI 기반 맞춤 학습을 위해 설정을 시작해볼까요?</p>
 
-            <!-- Step 1: API 키 입력 -->
             <div id="step-api" class="onboarding-step">
                 <h3>1. Gemini API 연결</h3>
                 <input type="password" id="api-key-input" placeholder="Gemini API 키를 입력하세요">
-                <small>
-                    <a href="https://makersuite.google.com/app/apikey" target="_blank">
-                        API 키 발급받기 →
-                    </a>
-                </small>
+                <small><a href="https://makersuite.google.com/app/apikey" target="_blank">API 키 발급받기 →</a></small>
                 <button class="btn-primary" onclick="app.onboarding.saveApiKey()">다음</button>
             </div>
 
-            <!-- Step 2: 실력 진단 체크리스트 -->
             <div id="step-assessment" class="onboarding-step hidden">
                 <h3>2. 현재 실력 진단</h3>
                 <p class="subtext">솔직하게 체크해주세요. AI가 최적의 학습 플랜을 만들어드려요!</p>
-
                 <div class="assessment-grid">
-                    <!-- 기초 드로잉 -->
                     <div class="assessment-category">
                         <h4>📐 기초 드로잉</h4>
-                        <label>
-                            <input type="radio" name="basic" value="beginner">
-                            <span>초급 - 선 긋기가 어색하고 도형 그리기를 연습 중</span>
-                        </label>
-                        <label>
-                            <input type="radio" name="basic" value="intermediate">
-                            <span>중급 - 간단한 사물을 스케치할 수 있음</span>
-                        </label>
-                        <label>
-                            <input type="radio" name="basic" value="advanced">
-                            <span>상급 - 복잡한 구조도 정확하게 그릴 수 있음</span>
-                        </label>
+                        <label><input type="radio" name="basic" value="beginner"><span>초급 - 선 긋기가 어색하고 도형 그리기를 연습 중</span></label>
+                        <label><input type="radio" name="basic" value="intermediate"><span>중급 - 간단한 사물을 스케치할 수 있음</span></label>
+                        <label><input type="radio" name="basic" value="advanced"><span>상급 - 복잡한 구조도 정확하게 그릴 수 있음</span></label>
                     </div>
-
-                    <!-- 인체 드로잉 -->
                     <div class="assessment-category">
                         <h4>👤 인체 드로잉</h4>
-                        <label>
-                            <input type="radio" name="anatomy" value="beginner">
-                            <span>초급 - 막대인간 수준, 비율이 어색함</span>
-                        </label>
-                        <label>
-                            <input type="radio" name="anatomy" value="intermediate">
-                            <span>중급 - 기본 비율을 알고 간단한 포즈 가능</span>
-                        </label>
-                        <label>
-                            <input type="radio" name="anatomy" value="advanced">
-                            <span>상급 - 근육 구조를 이해하고 동적 포즈 가능</span>
-                        </label>
+                        <label><input type="radio" name="anatomy" value="beginner"><span>초급 - 막대인간 수준, 비율이 어색함</span></label>
+                        <label><input type="radio" name="anatomy" value="intermediate"><span>중급 - 기본 비율을 알고 간단한 포즈 가능</span></label>
+                        <label><input type="radio" name="anatomy" value="advanced"><span>상급 - 근육 구조를 이해하고 동적 포즈 가능</span></label>
                     </div>
-
-                    <!-- 원근법 -->
                     <div class="assessment-category">
                         <h4>🏛 원근법</h4>
-                        <label>
-                            <input type="radio" name="perspective" value="beginner">
-                            <span>초급 - 소실점 개념을 모르거나 적용이 어려움</span>
-                        </label>
-                        <label>
-                            <input type="radio" name="perspective" value="intermediate">
-                            <span>중급 - 1, 2점 투시를 이해하고 적용 가능</span>
-                        </label>
-                        <label>
-                            <input type="radio" name="perspective" value="advanced">
-                            <span>상급 - 3점 투시 및 복잡한 공간 표현 가능</span>
-                        </label>
+                        <label><input type="radio" name="perspective" value="beginner"><span>초급 - 소실점 개념을 모르거나 적용이 어려움</span></label>
+                        <label><input type="radio" name="perspective" value="intermediate"><span>중급 - 1, 2점 투시를 이해하고 적용 가능</span></label>
+                        <label><input type="radio" name="perspective" value="advanced"><span>상급 - 3점 투시 및 복잡한 공간 표현 가능</span></label>
                     </div>
-
-                    <!-- 명암 -->
                     <div class="assessment-category">
                         <h4>💡 명암/빛</h4>
-                        <label>
-                            <input type="radio" name="shading" value="beginner">
-                            <span>초급 - 단순한 그라데이션만 가능</span>
-                        </label>
-                        <label>
-                            <input type="radio" name="shading" value="intermediate">
-                            <span>중급 - 광원을 고려한 기본 명암 표현</span>
-                        </label>
-                        <label>
-                            <input type="radio" name="shading" value="advanced">
-                            <span>상급 - 다양한 재질감과 복잡한 조명 표현</span>
-                        </label>
+                        <label><input type="radio" name="shading" value="beginner"><span>초급 - 단순한 그라데이션만 가능</span></label>
+                        <label><input type="radio" name="shading" value="intermediate"><span>중급 - 광원을 고려한 기본 명암 표현</span></label>
+                        <label><input type="radio" name="shading" value="advanced"><span>상급 - 다양한 재질감과 복잡한 조명 표현</span></label>
                     </div>
-
-                    <!-- 색채 -->
                     <div class="assessment-category">
                         <h4>🎨 색채/컬러</h4>
-                        <label>
-                            <input type="radio" name="color" value="beginner">
-                            <span>초급 - 색 조합이 어색하고 채도 조절이 어려움</span>
-                        </label>
-                        <label>
-                            <input type="radio" name="color" value="intermediate">
-                            <span>중급 - 기본 색상 이론을 이해하고 적용</span>
-                        </label>
-                        <label>
-                            <input type="radio" name="color" value="advanced">
-                            <span>상급 - 분위기에 맞는 색감 연출과 고급 기법</span>
-                        </label>
+                        <label><input type="radio" name="color" value="beginner"><span>초급 - 색 조합이 어색하고 채도 조절이 어려움</span></label>
+                        <label><input type="radio" name="color" value="intermediate"><span>중급 - 기본 색상 이론을 이해하고 적용</span></label>
+                        <label><input type="radio" name="color" value="advanced"><span>상급 - 분위기에 맞는 색감 연출과 고급 기법</span></label>
                     </div>
-
-                    <!-- 구도 -->
                     <div class="assessment-category">
                         <h4>📷 구도/레이아웃</h4>
-                        <label>
-                            <input type="radio" name="composition" value="beginner">
-                            <span>초급 - 화면 배치가 불안정하고 어색함</span>
-                        </label>
-                        <label>
-                            <input type="radio" name="composition" value="intermediate">
-                            <span>중급 - 기본 구도 법칙을 알고 적용</span>
-                        </label>
-                        <label>
-                            <input type="radio" name="composition" value="advanced">
-                            <span>상급 - 시선 유도와 스토리텔링이 가능한 구도</span>
-                        </label>
+                        <label><input type="radio" name="composition" value="beginner"><span>초급 - 화면 배치가 불안정하고 어색함</span></label>
+                        <label><input type="radio" name="composition" value="intermediate"><span>중급 - 기본 구도 법칙을 알고 적용</span></label>
+                        <label><input type="radio" name="composition" value="advanced"><span>상급 - 시선 유도와 스토리텔링이 가능한 구도</span></label>
                     </div>
                 </div>
-
-                <button class="btn-primary" onclick="app.onboarding.completeAssessment()">
-                    진단 완료 및 AI 분석 시작
-                </button>
-            </div>
-
-            <!-- Step 3: AI 분석 중 -->
-            <div id="step-analyzing" class="onboarding-step hidden">
-                <div class="analyzing-animation">
-                    <div class="spinner"></div>
-                    <h3>🤖 AI가 당신의 실력을 분석하고 있어요</h3>
-                    <p>맞춤형 학습 플랜을 생성 중...</p>
-                </div>
+                <button class="btn-primary" onclick="app.onboarding.completeAssessment()">진단 완료 및 AI 분석 시작</button>
             </div>
         </div>
     </div>
 
     <!--
         메인 네비게이션 바
-        - 하단 고정 탭 바
     -->
     <nav id="main-nav" class="bottom-nav hidden">
-        <button class="nav-item active" data-view="dashboard" onclick="app.router.navigate('dashboard')">
-            <span class="icon">🏠</span>
-            <span class="label">홈</span>
-        </button>
-        <button class="nav-item" data-view="tasks" onclick="app.router.navigate('tasks')">
-            <span class="icon">✅</span>
-            <span class="label">과제</span>
-        </button>
-        <button class="nav-item" data-view="gallery" onclick="app.router.navigate('gallery')">
-            <span class="icon">🖼</span>
-            <span class="label">갤러리</span>
-        </button>
-        <button class="nav-item" data-view="analytics" onclick="app.router.navigate('analytics')">
-            <span class="icon">📊</span>
-            <span class="label">분석</span>
-        </button>
-        <button class="nav-item" data-view="settings" onclick="app.router.navigate('settings')">
-            <span class="icon">⚙️</span>
-            <span class="label">설정</span>
-        </button>
+        <button class="nav-item active" data-view="dashboard" onclick="app.router.navigate('dashboard')"><span class="icon">🏠</span><span class="label">홈</span></button>
+        <button class="nav-item" data-view="tasks" onclick="app.router.navigate('tasks')"><span class="icon">✅</span><span class="label">과제</span></button>
+        <button class="nav-item" data-view="gallery" onclick="app.router.navigate('gallery')"><span class="icon">🖼</span><span class="label">갤러리</span></button>
+        <button class="nav-item" data-view="analytics" onclick="app.router.navigate('analytics')"><span class="icon">📊</span><span class="label">분석</span></button>
+        <button class="nav-item" data-view="settings" onclick="app.router.navigate('settings')"><span class="icon">⚙️</span><span class="label">설정</span></button>
     </nav>
 
     <!--
         화면 템플릿들
-        - 각 뷰는 JS에서 동적으로 렌더링됨
     -->
-
-    <!-- 대시보드 템플릿 -->
     <template id="dashboard-template">
         <div class="view dashboard-view">
-            <!-- 헤더 -->
             <header class="view-header">
                 <div class="header-top">
                     <h1>ArtQuest</h1>
                     <div class="header-actions">
-                        <button class="icon-btn" onclick="app.notifications.requestPermission()">
-                            <span class="icon">🔔</span>
-                        </button>
-                        <button class="icon-btn" onclick="app.timer.open()">
-                            <span class="icon">⏱</span>
-                        </button>
+                        <button class="icon-btn" onclick="app.notifications.requestPermission()"><span class="icon">🔔</span></button>
+                        <button class="icon-btn" onclick="app.timer.open()"><span class="icon">⏱</span></button>
                     </div>
                 </div>
-
-                <!-- 사용자 정보 카드 -->
                 <div class="user-card">
                     <div class="user-stats">
-                        <div class="stat">
-                            <span class="stat-value" id="total-points">0</span>
-                            <span class="stat-label">포인트</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-value" id="streak-days">0</span>
-                            <span class="stat-label">연속 일수 🔥</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-value" id="level-display">Lv.1</span>
-                            <span class="stat-label">레벨</span>
-                        </div>
+                        <div class="stat"><span class="stat-value" id="total-points">0</span><span class="stat-label">포인트</span></div>
+                        <div class="stat"><span class="stat-value" id="streak-days">0</span><span class="stat-label">연속 일수 🔥</span></div>
+                        <div class="stat"><span class="stat-value" id="level-display">Lv.1</span><span class="stat-label">레벨</span></div>
                     </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="level-progress" style="width: 0%"></div>
-                    </div>
+                    <div class="progress-bar"><div class="progress-fill" id="level-progress" style="width: 0%"></div></div>
                     <small class="progress-text">다음 레벨까지 <span id="points-to-next">100</span>점</small>
                 </div>
             </header>
 
-            <!-- 오늘의 과제 -->
             <section class="section">
+                <!-- FIX 8: 오늘의 과제는 '출석' 버튼을 통해 생성되도록 변경 -->
                 <div class="section-header">
                     <h2>📝 오늘의 과제</h2>
                     <span class="badge" id="today-task-count">0/0</span>
                 </div>
                 <div id="today-tasks" class="task-list">
-                    <!-- 동적으로 생성됨 -->
+                    <!-- JS로 동적으로 생성: 출석 버튼 또는 과제 목록 -->
                 </div>
             </section>
 
-            <!-- 주간 목표 -->
             <section class="section">
+                <!-- FIX 9: 주간 목표 '갱신' 버튼 추가 -->
                 <div class="section-header">
                     <h2>🎯 이번 주 목표</h2>
-                    <button class="btn-text" onclick="app.router.navigate('tasks')">전체보기</button>
+                    <button class="btn-secondary small" onclick="app.tasks.generateWeeklyGoals(true)">
+                        🔄 목표 갱신
+                    </button>
                 </div>
-                <div class="weekly-goals">
-                    <div class="goal-card" id="weekly-goal-1">
-                        <div class="goal-icon">📐</div>
-                        <div class="goal-content">
-                            <h4>기초 드로잉 강화</h4>
-                            <p>선 연습 5회 완료</p>
-                            <div class="progress-bar small">
-                                <div class="progress-fill" style="width: 0%"></div>
-                            </div>
-                        </div>
-                    </div>
+                <div id="weekly-goals-dashboard" class="weekly-goals">
+                    <!-- 동적으로 생성 -->
                 </div>
             </section>
 
-            <!-- 강점/약점 분석 -->
             <section class="section">
-                <div class="section-header">
-                    <h2>💪 나의 강점 & 약점</h2>
-                </div>
+                <!-- FIX 10: 강점/약점은 자가진단 시에만 갱신됨 (JS 로직으로 제어) -->
+                <div class="section-header"><h2>💪 나의 강점 & 약점</h2></div>
                 <div class="strength-weakness-grid">
                     <div class="sw-card strength">
                         <h4>강점</h4>
-                        <ul id="strengths-list">
-                            <li>분석 중...</li>
-                        </ul>
+                        <ul id="strengths-list"><li>분석 중...</li></ul>
                     </div>
                     <div class="sw-card weakness">
                         <h4>개선 필요</h4>
-                        <ul id="weaknesses-list">
-                            <li>분석 중...</li>
-                        </ul>
+                        <ul id="weaknesses-list"><li>분석 중...</li></ul>
                     </div>
                 </div>
             </section>
 
-            <!-- AI 추천 리소스 -->
             <section class="section">
+                <!-- FIX 3: 추천 학습 자료를 사용자 커스텀 링크로 변경 -->
                 <div class="section-header">
-                    <h2>🎓 추천 학습 자료</h2>
+                    <h2>🎓 나만의 학습 링크</h2>
                 </div>
-                <div id="recommended-resources" class="resource-list">
+                <div class="resource-form">
+                    <input type="text" id="resource-title-input" placeholder="링크 제목 (예: 프로코 유튜브 채널)">
+                    <input type="url" id="resource-url-input" placeholder="https://youtube.com/...">
+                    <button class="btn-primary small" onclick="app.dashboard.addCustomResource()">➕ 링크 추가</button>
+                </div>
+                <div id="custom-resources" class="resource-list custom">
                     <!-- 동적으로 생성됨 -->
                 </div>
             </section>
         </div>
     </template>
 
-    <!-- 과제 뷰 템플릿 -->
     <template id="tasks-template">
         <div class="view tasks-view">
             <header class="view-header">
@@ -329,21 +190,16 @@
                     <button class="tab" data-tab="custom" onclick="app.tasks.switchTab('custom')">커스텀</button>
                 </div>
             </header>
-
-            <!-- 일일 과제 -->
             <div id="daily-tasks" class="tab-content">
                 <div class="date-selector">
                     <button onclick="app.tasks.changeDate(-1)">◀</button>
                     <span id="selected-date">오늘</span>
                     <button onclick="app.tasks.changeDate(1)">▶</button>
                 </div>
-                <div id="daily-task-list" class="task-list detailed">
-                    <!-- 동적 생성 -->
-                </div>
+                <div id="daily-task-list" class="task-list detailed"></div>
             </div>
-
-            <!-- 주간 과제 -->
             <div id="weekly-tasks" class="tab-content hidden">
+                <!-- FIX 9: 주간 과제 UI 업데이트 (갱신 버튼 포함) -->
                 <div class="weekly-overview">
                     <div class="week-progress">
                         <h3>이번 주 진행도</h3>
@@ -352,449 +208,190 @@
                                 <circle cx="50" cy="50" r="45" class="progress-bg"></circle>
                                 <circle cx="50" cy="50" r="45" class="progress-bar" id="week-progress-circle"></circle>
                             </svg>
-                            <div class="progress-text">
-                                <span class="percentage" id="week-percentage">0%</span>
-                            </div>
+                            <div class="progress-text"><span class="percentage" id="week-percentage">0%</span></div>
                         </div>
                     </div>
+                    <button class="btn-primary" onclick="app.tasks.generateWeeklyGoals(true)">🔄 AI로 목표 갱신</button>
                 </div>
-                <div id="weekly-task-list" class="task-list detailed">
-                    <!-- 동적 생성 -->
-                </div>
+                <div id="weekly-task-list" class="task-list detailed"></div>
             </div>
-
-            <!-- 커스텀 과제 -->
             <div id="custom-tasks" class="tab-content hidden">
-                <button class="btn-primary" onclick="app.tasks.addCustomTask()">
-                    ➕ 나만의 과제 추가
-                </button>
-                <div id="custom-task-list" class="task-list detailed">
-                    <!-- 동적 생성 -->
-                </div>
+                <button class="btn-primary" onclick="app.tasks.addCustomTask()">➕ 나만의 과제 추가</button>
+                <div id="custom-task-list" class="task-list detailed"></div>
             </div>
         </div>
     </template>
 
-    <!-- 갤러리 뷰 템플릿 -->
     <template id="gallery-template">
         <div class="view gallery-view">
             <header class="view-header">
                 <h1>🖼 나의 작품 갤러리</h1>
                 <div class="header-actions">
-                    <button class="icon-btn" onclick="app.gallery.toggleView()">
-                        <span class="icon" id="view-toggle-icon">📅</span>
-                    </button>
-                    <button class="btn-primary small" onclick="app.gallery.uploadArt()">
-                        ➕ 작품 추가
-                    </button>
+                    <button class="icon-btn" onclick="app.gallery.toggleView()"><span class="icon" id="view-toggle-icon">📅</span></button>
+                    <button class="btn-primary small" onclick="app.gallery.uploadArt()">➕ 작품 추가</button>
                 </div>
             </header>
-
-            <!-- 뷰 전환 탭 -->
             <div class="view-tabs">
-                <button class="tab active" data-view="calendar" onclick="app.gallery.switchView('calendar')">
-                    캘린더
-                </button>
-                <button class="tab" data-view="list" onclick="app.gallery.switchView('list')">
-                    리스트
-                </button>
-                <button class="tab" data-view="grid" onclick="app.gallery.switchView('grid')">
-                    그리드
-                </button>
+                <button class="tab active" data-view="calendar" onclick="app.gallery.switchView('calendar')">캘린더</button>
+                <button class="tab" data-view="list" onclick="app.gallery.switchView('list')">리스트</button>
+                <button class="tab" data-view="grid" onclick="app.gallery.switchView('grid')">그리드</button>
             </div>
-
-            <!-- 캘린더 뷰 -->
             <div id="calendar-view" class="gallery-content">
                 <div class="calendar-header">
                     <button onclick="app.gallery.changeMonth(-1)">◀</button>
                     <h3 id="current-month">2024년 1월</h3>
                     <button onclick="app.gallery.changeMonth(1)">▶</button>
                 </div>
-                <div id="calendar-grid" class="calendar-grid">
-                    <!-- 동적 생성 -->
-                </div>
+                <div id="calendar-grid" class="calendar-grid"></div>
             </div>
-
-            <!-- 리스트 뷰 -->
             <div id="list-view" class="gallery-content hidden">
                 <div class="filter-bar">
                     <select id="category-filter" onchange="app.gallery.applyFilters()">
                         <option value="all">전체 카테고리</option>
-                        <option value="basic">기초</option>
-                        <option value="anatomy">인체</option>
-                        <option value="perspective">원근법</option>
-                        <option value="shading">명암</option>
-                        <option value="color">색채</option>
-                        <option value="composition">구도</option>
+                        <option value="basic">기초</option><option value="anatomy">인체</option><option value="perspective">원근법</option><option value="shading">명암</option><option value="color">색채</option><option value="composition">구도</option>
                     </select>
-                    <input type="text" id="search-input" placeholder="작품 검색..."
-                           oninput="app.gallery.applyFilters()">
+                    <input type="text" id="search-input" placeholder="작품 검색..." oninput="app.gallery.applyFilters()">
                 </div>
-                <div id="art-list" class="art-list">
-                    <!-- 동적 생성 -->
-                </div>
+                <div id="art-list" class="art-list"></div>
             </div>
-
-            <!-- 그리드 뷰 -->
             <div id="grid-view" class="gallery-content hidden">
-                <div id="art-grid" class="art-grid">
-                    <!-- 동적 생성 -->
-                </div>
+                <div id="art-grid" class="art-grid"></div>
             </div>
         </div>
     </template>
 
-    <!-- 분석 뷰 템플릿 -->
     <template id="analytics-template">
         <div class="view analytics-view">
             <header class="view-header">
                 <h1>📊 학습 분석</h1>
-                <button class="btn-text" onclick="app.analytics.generateWeeklyReport()">
-                    주간 리포트 보기
-                </button>
+                <button class="btn-text" onclick="app.analytics.generateWeeklyReport()">주간 리포트 보기</button>
             </header>
-
-            <!-- 전체 통계 -->
             <section class="section">
                 <h2>📈 전체 통계</h2>
                 <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon">🎯</div>
-                        <div class="stat-info">
-                            <span class="stat-value" id="total-tasks-completed">0</span>
-                            <span class="stat-label">완료한 과제</span>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">⏱</div>
-                        <div class="stat-info">
-                            <span class="stat-value" id="total-study-time">0h</span>
-                            <span class="stat-label">총 학습 시간</span>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">🖼</div>
-                        <div class="stat-info">
-                            <span class="stat-value" id="total-artworks">0</span>
-                            <span class="stat-label">업로드한 작품</span>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">📅</div>
-                        <div class="stat-info">
-                            <span class="stat-value" id="study-days">0</span>
-                            <span class="stat-label">학습한 날</span>
-                        </div>
-                    </div>
+                    <div class="stat-card"><div class="stat-icon">🎯</div><div class="stat-info"><span class="stat-value" id="total-tasks-completed">0</span><span class="stat-label">완료한 과제</span></div></div>
+                    <div class="stat-card"><div class="stat-icon">⏱</div><div class="stat-info"><span class="stat-value" id="total-study-time">0h</span><span class="stat-label">총 학습 시간</span></div></div>
+                    <div class="stat-card"><div class="stat-icon">🖼</div><div class="stat-info"><span class="stat-value" id="total-artworks">0</span><span class="stat-label">업로드한 작품</span></div></div>
+                    <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-info"><span class="stat-value" id="study-days">0</span><span class="stat-label">학습한 날</span></div></div>
                 </div>
             </section>
-
-            <!-- 카테고리별 진행도 -->
             <section class="section">
                 <h2>🎨 카테고리별 실력</h2>
                 <div class="category-progress">
-                    <div class="category-bar">
-                        <div class="bar-header">
-                            <span>📐 기초 드로잉</span>
-                            <span class="level-badge">Lv.3</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" data-category="basic" style="width: 0%"></div>
-                        </div>
-                    </div>
-                    <div class="category-bar">
-                        <div class="bar-header">
-                            <span>👤 인체 드로잉</span>
-                            <span class="level-badge">Lv.2</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" data-category="anatomy" style="width: 0%"></div>
-                        </div>
-                    </div>
-                    <div class="category-bar">
-                        <div class="bar-header">
-                            <span>🏛 원근법</span>
-                            <span class="level-badge">Lv.2</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" data-category="perspective" style="width: 0%"></div>
-                        </div>
-                    </div>
-                    <div class="category-bar">
-                        <div class="bar-header">
-                            <span>💡 명암/빛</span>
-                            <span class="level-badge">Lv.1</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" data-category="shading" style="width: 0%"></div>
-                        </div>
-                    </div>
-                    <div class="category-bar">
-                        <div class="bar-header">
-                            <span>🎨 색채</span>
-                            <span class="level-badge">Lv.1</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" data-category="color" style="width: 0%"></div>
-                        </div>
-                    </div>
-                    <div class="category-bar">
-                        <div class="bar-header">
-                            <span>📷 구도</span>
-                            <span class="level-badge">Lv.2</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" data-category="composition" style="width: 0%"></div>
-                        </div>
-                    </div>
+                    <div class="category-bar"><div class="bar-header"><span>📐 기초 드로잉</span><span class="level-badge">Lv.1</span></div><div class="progress-bar"><div class="progress-fill" data-category="basic" style="width: 0%"></div></div></div>
+                    <div class="category-bar"><div class="bar-header"><span>👤 인체 드로잉</span><span class="level-badge">Lv.1</span></div><div class="progress-bar"><div class="progress-fill" data-category="anatomy" style="width: 0%"></div></div></div>
+                    <div class="category-bar"><div class="bar-header"><span>🏛 원근법</span><span class="level-badge">Lv.1</span></div><div class="progress-bar"><div class="progress-fill" data-category="perspective" style="width: 0%"></div></div></div>
+                    <div class="category-bar"><div class="bar-header"><span>💡 명암/빛</span><span class="level-badge">Lv.1</span></div><div class="progress-bar"><div class="progress-fill" data-category="shading" style="width: 0%"></div></div></div>
+                    <div class="category-bar"><div class="bar-header"><span>🎨 색채</span><span class="level-badge">Lv.1</span></div><div class="progress-bar"><div class="progress-fill" data-category="color" style="width: 0%"></div></div></div>
+                    <div class="category-bar"><div class="bar-header"><span>📷 구도</span><span class="level-badge">Lv.1</span></div><div class="progress-bar"><div class="progress-fill" data-category="composition" style="width: 0%"></div></div></div>
                 </div>
             </section>
-
-            <!-- 학습 히스토리 차트 -->
+            <section class="section"><h2>📅 최근 30일 활동</h2><div id="activity-chart" class="activity-chart"></div></section>
             <section class="section">
-                <h2>📅 최근 30일 활동</h2>
-                <div id="activity-chart" class="activity-chart">
-                    <!-- 간단한 히트맵 차트 -->
+                <!-- FIX 4: 새로고침 버튼을 누를 때만 AI 코칭 갱신 -->
+                <div class="section-header">
+                    <h2>🤖 AI 학습 코칭</h2>
+                    <button class="btn-secondary small" onclick="app.analytics.requestNewAIFeedback()">🔄 새로고침</button>
                 </div>
-            </section>
-
-            <!-- AI 피드백 -->
-            <section class="section">
-                <h2>🤖 AI 학습 코칭</h2>
                 <div class="ai-feedback-card">
-                    <div id="ai-feedback-content">
-                        <p>로딩 중...</p>
-                    </div>
-                    <button class="btn-secondary" onclick="app.analytics.refreshAIFeedback()">
-                        새로고침
-                    </button>
+                    <div id="ai-feedback-content"><p>로딩 중...</p></div>
                 </div>
             </section>
         </div>
     </template>
 
-    <!-- 설정 뷰 템플릿 -->
     <template id="settings-template">
         <div class="view settings-view">
-            <header class="view-header">
-                <h1>⚙️ 설정</h1>
-            </header>
-
-            <!-- API 설정 -->
+            <header class="view-header"><h1>⚙️ 설정</h1></header>
             <section class="section">
                 <h2>🔑 API 설정</h2>
-                <div class="setting-item">
-                    <label>Gemini API 키</label>
-                    <div class="input-group">
-                        <input type="password" id="settings-api-key" placeholder="API 키">
-                        <button class="btn-secondary" onclick="app.settings.updateApiKey()">저장</button>
-                    </div>
-                </div>
-                <div class="setting-item">
-                    <button class="btn-text" onclick="app.settings.testApiConnection()">
-                        연결 테스트
-                    </button>
-                </div>
+                <div class="setting-item"><label>Gemini API 키</label><div class="input-group"><input type="password" id="settings-api-key" placeholder="API 키"><button class="btn-secondary" onclick="app.settings.updateApiKey()">저장</button></div></div>
+                <div class="setting-item"><button class="btn-text" onclick="app.settings.testApiConnection()">연결 테스트</button></div>
             </section>
-
-            <!-- 실력 재진단 -->
             <section class="section">
                 <h2>📊 실력 진단</h2>
-                <div class="setting-item">
-                    <p>현재 실력 수준이 변경되었다면 다시 진단해보세요.</p>
-                    <button class="btn-secondary" onclick="app.settings.reopenAssessment()">
-                        실력 재진단하기
-                    </button>
-                </div>
+                <div class="setting-item"><p>현재 실력 수준이 변경되었다면 다시 진단해보세요.</p><button class="btn-secondary" onclick="app.settings.reopenAssessment()">실력 재진단하기</button></div>
             </section>
-
-            <!-- 알림 설정 -->
             <section class="section">
                 <h2>🔔 알림</h2>
-                <div class="setting-item toggle">
-                    <div>
-                        <label>푸시 알림</label>
-                        <small>매일 학습 리마인더를 받아보세요</small>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="notification-toggle"
-                               onchange="app.notifications.toggle()">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="setting-item" id="notification-time-setting">
-                    <label>알림 시간</label>
-                    <input type="time" id="notification-time" value="20:00"
-                           onchange="app.notifications.updateTime()">
-                </div>
+                <div class="setting-item toggle"><div><label>푸시 알림</label><small>매일 학습 리마인더를 받아보세요</small></div><label class="switch"><input type="checkbox" id="notification-toggle" onchange="app.notifications.toggle()"><span class="slider"></span></label></div>
+                <div class="setting-item" id="notification-time-setting"><label>알림 시간</label><input type="time" id="notification-time" value="20:00" onchange="app.notifications.updateTime()"></div>
             </section>
-
-            <!-- 테마 설정 -->
             <section class="section">
                 <h2>🎨 테마</h2>
                 <div class="setting-item">
                     <label>컬러 테마</label>
                     <div class="theme-colors">
-                        <button class="color-btn" data-color="indigo" style="background: #6366f1"
-                                onclick="app.theme.changeColor('indigo')"></button>
-                        <button class="color-btn" data-color="blue" style="background: #3b82f6"
-                                onclick="app.theme.changeColor('blue')"></button>
-                        <button class="color-btn" data-color="purple" style="background: #a855f7"
-                                onclick="app.theme.changeColor('purple')"></button>
-                        <button class="color-btn" data-color="pink" style="background: #ec4899"
-                                onclick="app.theme.changeColor('pink')"></button>
-                        <button class="color-btn" data-color="green" style="background: #10b981"
-                                onclick="app.theme.changeColor('green')"></button>
-                        <button class="color-btn" data-color="orange" style="background: #f59e0b"
-                                onclick="app.theme.changeColor('orange')"></button>
+                        <button class="color-btn" data-color="indigo" style="background: #6366f1" onclick="app.theme.changeColor('indigo')"></button>
+                        <button class="color-btn" data-color="blue" style="background: #3b82f6" onclick="app.theme.changeColor('blue')"></button>
+                        <button class="color-btn" data-color="purple" style="background: #a855f7" onclick="app.theme.changeColor('purple')"></button>
+                        <button class="color-btn" data-color="pink" style="background: #ec4899" onclick="app.theme.changeColor('pink')"></button>
+                        <button class="color-btn" data-color="green" style="background: #10b981" onclick="app.theme.changeColor('green')"></button>
+                        <button class="color-btn" data-color="orange" style="background: #f59e0b" onclick="app.theme.changeColor('orange')"></button>
                     </div>
                 </div>
                 <div class="setting-item">
                     <label>배경 모드</label>
                     <div class="theme-modes">
-                        <button class="mode-btn" data-mode="light" onclick="app.theme.changeMode('light')">
-                            ☀️ 라이트
-                        </button>
-                        <button class="mode-btn active" data-mode="auto" onclick="app.theme.changeMode('auto')">
-                            🌗 자동
-                        </button>
-                        <button class="mode-btn" data-mode="dark" onclick="app.theme.changeMode('dark')">
-                            🌙 다크
-                        </button>
+                        <button class="mode-btn" data-mode="light" onclick="app.theme.changeMode('light')">☀️ 라이트</button>
+                        <button class="mode-btn active" data-mode="auto" onclick="app.theme.changeMode('auto')">🌗 자동</button>
+                        <button class="mode-btn" data-mode="dark" onclick="app.theme.changeMode('dark')">🌙 다크</button>
                     </div>
                 </div>
             </section>
-
-            <!-- 폰트 설정 -->
             <section class="section">
                 <h2>✍️ 폰트</h2>
+                <div class="setting-item"><label>기본 폰트</label><select id="font-select" onchange="app.theme.changeFont()"></select></div>
                 <div class="setting-item">
-                    <label>기본 폰트</label>
-                    <select id="font-select" onchange="app.theme.changeFont()">
-                        <option value="Pretendard">Pretendard (기본)</option>
-                        <option value="Noto Sans KR">Noto Sans KR</option>
-                        <option value="Nanum Gothic">나눔고딕</option>
-                        <option value="Nanum Myeongjo">나눔명조</option>
-                    </select>
-                </div>
-                <div class="setting-item">
-                    <label>커스텀 폰트 추가 (Google Fonts)</label>
-                    <div class="input-group">
-                        <input type="text" id="custom-font-input"
-                               placeholder="예: Roboto">
-                        <button class="btn-secondary" onclick="app.theme.addCustomFont()">추가</button>
-                    </div>
-                    <small>Google Fonts에서 사용 가능한 폰트명을 입력하세요</small>
+                    <!-- FIX 6: 폰트 추가 방식을 웹폰트 코드로 변경 -->
+                    <label>커스텀 웹폰트 추가 (@font-face)</label>
+                    <textarea id="custom-font-input" rows="5" placeholder="@font-face 코드를 여기에 붙여넣으세요."></textarea>
+                    <button class="btn-secondary" onclick="app.theme.addCustomFont()">추가</button>
+                    <small>예: @font-face { font-family: '이름'; src: url(...) ... }</small>
                 </div>
             </section>
-
-            <!-- 데이터 관리 -->
             <section class="section">
                 <h2>💾 데이터</h2>
-                <div class="setting-item">
-                    <button class="btn-secondary" onclick="app.storage.exportData()">
-                        데이터 내보내기 (JSON)
-                    </button>
-                </div>
-                <div class="setting-item">
-                    <button class="btn-secondary" onclick="app.storage.importData()">
-                        데이터 가져오기
-                    </button>
-                </div>
-                <div class="setting-item">
-                    <button class="btn-danger" onclick="app.storage.resetAll()">
-                        모든 데이터 초기화
-                    </button>
-                    <small class="warning">⚠️ 이 작업은 되돌릴 수 없습니다</small>
-                </div>
+                <div class="setting-item"><button class="btn-secondary" onclick="app.storage.exportData()">데이터 내보내기 (JSON)</button></div>
+                <div class="setting-item"><button class="btn-secondary" onclick="app.storage.importData()">데이터 가져오기</button></div>
+                <div class="setting-item"><button class="btn-danger" onclick="app.storage.resetAll()">모든 데이터 초기화</button><small class="warning">⚠️ 이 작업은 되돌릴 수 없습니다</small></div>
             </section>
-
-            <!-- 앱 정보 -->
             <section class="section">
                 <h2>ℹ️ 정보</h2>
-                <div class="app-info">
-                    <p><strong>ArtQuest</strong> v1.0.0</p>
-                    <p>AI 기반 그림 학습 게이미피케이션 앱</p>
-                    <p class="copyright">© 2024 ArtQuest. All rights reserved.</p>
-                </div>
+                <div class="app-info"><p><strong>ArtQuest</strong> v1.1.0</p><p>AI 기반 그림 학습 게이미피케이션 앱</p><p class="copyright">© 2024 ArtQuest. All rights reserved.</p></div>
             </section>
         </div>
     </template>
 
-    <!-- 타이머 모달 -->
+    <!-- FIX 2: AI 응답 대기 로딩 모달 -->
+    <div id="ai-loading-modal" class="modal hidden">
+        <div class="modal-content ai-loading">
+            <div class="spinner"></div>
+            <p id="ai-loading-message">AI가 답변을 생성하고 있어요...</p>
+        </div>
+    </div>
+
+    <!-- FIX 7: 실력 진단 결과(MBTI) 모달 -->
+    <div id="assessment-result-modal" class="modal hidden">
+        <div class="modal-content assessment-result">
+            <button class="close-btn" onclick="app.onboarding.closeResultModal()">✕</button>
+            <div id="assessment-result-content">
+                <!-- 동적으로 생성 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 기타 모달 (타이머, 작품상세, 주간리포트) -->
     <div id="timer-modal" class="modal hidden">
-        <div class="modal-content timer-modal">
-            <button class="close-btn" onclick="app.timer.close()">✕</button>
-            <h2>⏱ 포모도로 타이머</h2>
-
-            <div class="timer-display">
-                <div class="timer-circle">
-                    <svg viewBox="0 0 200 200">
-                        <circle cx="100" cy="100" r="90" class="timer-bg"></circle>
-                        <circle cx="100" cy="100" r="90" class="timer-progress" id="timer-progress-circle"></circle>
-                    </svg>
-                    <div class="timer-text">
-                        <span class="time" id="timer-display">25:00</span>
-                        <span class="mode" id="timer-mode">집중 시간</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="timer-controls">
-                <button class="btn-primary" id="timer-start-btn" onclick="app.timer.start()">
-                    시작
-                </button>
-                <button class="btn-secondary hidden" id="timer-pause-btn" onclick="app.timer.pause()">
-                    일시정지
-                </button>
-                <button class="btn-secondary" onclick="app.timer.reset()">
-                    리셋
-                </button>
-            </div>
-
-            <div class="timer-settings">
-                <div class="setting-row">
-                    <label>집중 시간</label>
-                    <input type="number" id="focus-duration" value="25" min="1" max="60">
-                    <span>분</span>
-                </div>
-                <div class="setting-row">
-                    <label>휴식 시간</label>
-                    <input type="number" id="break-duration" value="5" min="1" max="30">
-                    <span>분</span>
-                </div>
-            </div>
-
-            <div class="timer-stats">
-                <p>오늘의 뽀모도로: <strong id="today-pomodoros">0</strong>개</p>
-            </div>
-        </div>
+        <div class="modal-content timer-modal"><button class="close-btn" onclick="app.timer.close()">✕</button><h2>⏱ 포모도로 타이머</h2><div class="timer-display"><div class="timer-circle"><svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="90" class="timer-bg"></circle><circle cx="100" cy="100" r="90" class="timer-progress" id="timer-progress-circle"></circle></svg><div class="timer-text"><span class="time" id="timer-display">25:00</span><span class="mode" id="timer-mode">집중 시간</span></div></div></div><div class="timer-controls"><button class="btn-primary" id="timer-start-btn" onclick="app.timer.start()">시작</button><button class="btn-secondary hidden" id="timer-pause-btn" onclick="app.timer.pause()">일시정지</button><button class="btn-secondary" onclick="app.timer.reset()">리셋</button></div><div class="timer-settings"><div class="setting-row"><label>집중 시간</label><input type="number" id="focus-duration" value="25" min="1" max="60"><span>분</span></div><div class="setting-row"><label>휴식 시간</label><input type="number" id="break-duration" value="5" min="1" max="30"><span>분</span></div></div><div class="timer-stats"><p>오늘의 뽀모도로: <strong id="today-pomodoros">0</strong>개</p></div></div>
     </div>
-
-    <!-- 작품 상세 모달 -->
     <div id="artwork-modal" class="modal hidden">
-        <div class="modal-content artwork-modal">
-            <button class="close-btn" onclick="app.gallery.closeArtwork()">✕</button>
-            <div id="artwork-detail">
-                <!-- 동적 생성 -->
-            </div>
-        </div>
+        <div class="modal-content artwork-modal"><button class="close-btn" onclick="app.gallery.closeArtwork()">✕</button><div id="artwork-detail"></div></div>
     </div>
-
-    <!-- 주간 리포트 모달 -->
     <div id="weekly-report-modal" class="modal hidden">
-        <div class="modal-content report-modal">
-            <button class="close-btn" onclick="app.analytics.closeReport()">✕</button>
-            <div id="weekly-report-content">
-                <!-- 동적 생성 -->
-            </div>
-        </div>
+        <div class="modal-content report-modal"><button class="close-btn" onclick="app.analytics.closeReport()">✕</button><div id="weekly-report-content"></div></div>
     </div>
-
-    <!-- Toast 알림 -->
     <div id="toast-container"></div>
-
-    <!-- JS 모듈 로드 -->
     <script type="module" src="js/app.js"></script>
 </body>
 </html>
