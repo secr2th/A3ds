@@ -1170,3 +1170,173 @@ input:checked + .slider:before {
   transform: scale(1.1);
 }
 
+/* ===== 실력 진단 결과 ===== */
+.assessment-result {
+  text-align: center;
+}
+
+.assessment-result-header {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+  color: white;
+  padding: var(--spacing-8) var(--spacing-6);
+  border-radius: var(--radius-xl);
+  margin-bottom: var(--spacing-6);
+}
+
+.assessment-result-header h2 {
+  color: white;
+  font-size: var(--font-size-3xl);
+  margin-bottom: var(--spacing-3);
+}
+
+.assessment-result-level {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.2);
+  padding: var(--spacing-2) var(--spacing-5);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  margin-top: var(--spacing-2);
+}
+
+.assessment-result-summary {
+  background: var(--bg-secondary);
+  padding: var(--spacing-6);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-5);
+  text-align: left;
+}
+
+.assessment-result-summary h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-3);
+}
+
+.assessment-result-summary p {
+  line-height: var(--line-height-relaxed);
+  color: var(--text-secondary);
+}
+
+.assessment-categories {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-5);
+}
+
+.category-result-card {
+  background: var(--bg-secondary);
+  padding: var(--spacing-4);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+
+.category-result-icon {
+  font-size: 32px;
+  margin-bottom: var(--spacing-2);
+}
+
+.category-result-name {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-2);
+}
+
+.category-result-level {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+}
+
+.assessment-strengths-weaknesses {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-5);
+}
+
+.result-sw-card {
+  background: var(--bg-secondary);
+  padding: var(--spacing-5);
+  border-radius: var(--radius-lg);
+  text-align: left;
+}
+
+.result-sw-card.strength {
+  border-left: 4px solid var(--color-success);
+}
+
+.result-sw-card.weakness {
+  border-left: 4px solid var(--color-warning);
+}
+
+.result-sw-card h4 {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-3);
+}
+
+.result-sw-card ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.result-sw-card li {
+  padding-left: var(--spacing-4);
+  position: relative;
+  line-height: var(--line-height-relaxed);
+  color: var(--text-secondary);
+}
+
+.result-sw-card li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: var(--color-primary);
+  font-weight: bold;
+}
+
+.assessment-recommendations {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: var(--spacing-6);
+  border-radius: var(--radius-xl);
+  text-align: left;
+  margin-bottom: var(--spacing-5);
+}
+
+.assessment-recommendations h3 {
+  color: white;
+  margin-bottom: var(--spacing-4);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.assessment-recommendations ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.assessment-recommendations li {
+  padding-left: var(--spacing-5);
+  position: relative;
+  line-height: var(--line-height-relaxed);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.assessment-recommendations li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+
