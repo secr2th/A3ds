@@ -173,24 +173,24 @@ class AnalyticsManager {
     return weekData;
   }
 
-  /**
+    /**
    * AI 피드백 새로고침
    */
   async refreshAIFeedback() {
     const feedbackEl = document.getElementById('ai-feedback-content');
     if (!feedbackEl) return;
 
+    // 👇 AI 로딩 표시 추가
+    if (window.app) window.app.showAILoading();
+
     try {
       feedbackEl.innerHTML = '<p style="color: rgba(255,255,255,0.7);">AI가 분석 중...</p>';
 
       const userData = storage.getUserData();
       const analytics = storage.getAnalytics();
-
-      // 최근 활동 분석
       const recentActivity = this.getRecentActivity(7);
       const completedTasks = recentActivity.reduce((sum, day) => sum + day.tasks, 0);
 
-      // 가장 약한 카테고리 찾기
       const categoryProgress = analytics.categoryProgress;
       let weakestCategory = 'basic';
       let minPoints = Infinity;
@@ -207,17 +207,29 @@ class AnalyticsManager {
       });
 
       feedbackEl.innerHTML = `<p style="color: rgba(255,255,255,0.95); line-height: 1.6;">${feedback}</p>`;
+
+      // 👇 피드백 캐싱
+      storage.set('ai_feedback_cache', {
+        text: feedback,
+        timestamp: new Date().toISOString()
+      });
+
+      // 👇 AI 로딩 숨김
+      if (window.app) window.app.hideAILoading();
+
     } catch (error) {
       console.error('AI feedback error:', error);
+      if (window.app) window.app.hideAILoading();
+
       feedbackEl.innerHTML = `
         <p style="color: rgba(255,255,255,0.9);">
           꾸준히 학습하고 계시네요! 💪<br>
-          매일 조금씩 그리는 습관이 실력을 만듭니다.<br>
-          오늘도 화이팅!
+          매일 조금씩 그리는 습관이 실력을 만듭니다.
         </p>
       `;
     }
   }
+
 
   /**
    * 주간 리포트 생성
