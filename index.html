@@ -282,25 +282,25 @@
                 </div>
             </section>
 
-            <!-- 주간 목표 -->
+                        <!-- 주간 목표 -->
             <section class="section">
                 <div class="section-header">
                     <h2>🎯 이번 주 목표</h2>
-                    <button class="btn-text" onclick="app.router.navigate('tasks')">전체보기</button>
+                    <div style="display: flex; gap: 8px;">
+                        <!-- 👇 갱신 버튼 추가 -->
+                        <button class="btn-secondary small" onclick="app.tasks.refreshWeeklyGoals()">
+                            🔄 갱신
+                        </button>
+                        <button class="btn-text" onclick="app.router.navigate('tasks')">전체보기</button>
+                    </div>
                 </div>
-                <div class="weekly-goals">
+                <div class="weekly-goals" id="dashboard-weekly-goals">
                     <div class="goal-card" id="weekly-goal-1">
-                        <div class="goal-icon">📐</div>
-                        <div class="goal-content">
-                            <h4>기초 드로잉 강화</h4>
-                            <p>선 연습 5회 완료</p>
-                            <div class="progress-bar small">
-                                <div class="progress-fill" style="width: 0%"></div>
-                            </div>
-                        </div>
+                        <!-- 동적 생성 -->
                     </div>
                 </div>
             </section>
+
 
             <!-- 강점/약점 분석 -->
             <section class="section">
