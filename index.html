@@ -437,18 +437,14 @@
 
             <!-- 리스트 뷰 -->
             <div id="list-view" class="gallery-content hidden">
-                <div class="filter-bar">
-                    <select id="category-filter" onchange="app.gallery.applyFilters()">
-                        <option value="all">전체 카테고리</option>
-                        <option value="basic">기초</option>
-                        <option value="anatomy">인체</option>
-                        <option value="perspective">원근법</option>
-                        <option value="shading">명암</option>
-                        <option value="color">색채</option>
-                        <option value="composition">구도</option>
-                    </select>
+                <div class="filter-bar" style="margin-bottom: 16px;">
+                    <div id="tag-filter-container" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;">
+                        <!-- Tag filters will be dynamically generated -->
+                    </div>
                     <input type="text" id="search-input" placeholder="작품 검색..."
-                           oninput="app.gallery.applyFilters()">
+                           oninput="app.gallery.applyFilters()"
+                           style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); 
+                                  background: var(--bg-secondary); color: var(--text-primary);">
                 </div>
                 <div id="art-list" class="art-list">
                     <!-- 동적 생성 -->
