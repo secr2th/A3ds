@@ -823,8 +823,20 @@
         </div>
     </div>
 
+    <!-- 👇 실력 진단 결과 모달 추가 -->
+    <div id="assessment-result-modal" class="modal hidden">
+        <div class="modal-content" style="max-width: 700px;">
+            <button class="close-btn" onclick="document.getElementById('assessment-result-modal').classList.add('hidden')">✕</button>
+            <div id="assessment-result-content">
+                <!-- 동적 생성됨 -->
+            </div>
+        </div>
+    </div>
+
+
     <!-- Toast 알림 -->
     <div id="toast-container"></div>
+
 
     <!-- 👇 AI 로딩 오버레이 추가 -->
     <div id="ai-loading-overlay" class="modal hidden" style="z-index: 2000;">
