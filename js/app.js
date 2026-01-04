@@ -164,8 +164,18 @@ class ArtQuestApp {
 
       closeModal: () => {
         const modal = document.getElementById('onboarding-modal');
-        if (confirm('설정을 중단하시겠습니까? 나중에 설정에서 다시 진행할 수 있습니다.')) {
+        // Check if user has already completed onboarding before
+        const hasApiKey = storage.getApiKey();
+        const hasAssessment = storage.getAssessment();
+        
+        if (hasApiKey && hasAssessment) {
+          // User is re-assessing, can close freely
           modal.classList.add('hidden');
+        } else {
+          // First time onboarding, show confirmation
+          if (confirm('설정을 중단하시겠습니까? 나중에 설정에서 다시 진행할 수 있습니다.')) {
+            modal.classList.add('hidden');
+          }
         }
       },
 
@@ -214,12 +224,24 @@ class ArtQuestApp {
           const analysis = await gemini.analyzeAssessment(assessment);
           await this.onboarding.generateInitialData(assessment, analysis);
 
+          // Close the onboarding modal
+          const modal = document.getElementById('onboarding-modal');
           modal.classList.add('hidden');
           
           // Show result popup MBTI-style
-          // Store that we need to init app after modal closes
-          window.app._pendingInitAfterAssessment = true;
           this.showAssessmentResult(analysis, assessment);
+          
+          // Check if this is a re-assessment (not first time)
+          const userData = storage.getUserData();
+          if (userData.joinDate) {
+            // This is re-assessment, refresh dashboard
+            if (window.app.dashboard) {
+              window.app.dashboard.render();
+            }
+          } else {
+            // First time, flag to init app after modal closes
+            window.app._pendingInitAfterAssessment = true;
+          }
 
         } catch (error) {
           console.error('분석 오류:', error);
@@ -322,9 +344,16 @@ class ArtQuestApp {
                  const dayOfWeek = new Date().getDay();
                  const result = await gemini.generateDailyTasks(assessment, dayOfWeek);
                  
-                 // Only add 1-3 tasks
-                 const tasksToAdd = result.tasks.slice(0, Math.floor(Math.random() * 3) + 1);
                  const tasks = storage.getTasks();
+                 
+                 // Delete all existing tasks for today
+                 tasks.daily = tasks.daily.filter(t => 
+                   UTILS.formatDate(t.date || t.createdAt) !== today
+                 );
+                 
+                 // Only add 1-3 tasks randomly
+                 const numTasks = Math.floor(Math.random() * 3) + 1; // Random 1-3
+                 const tasksToAdd = result.tasks.slice(0, numTasks);
                  
                  tasksToAdd.forEach(task => {
                    tasks.daily.push({
@@ -339,6 +368,9 @@ class ArtQuestApp {
                  
                  storage.setTasks(tasks);
                  storage.set('last_attendance_date', today);
+                 
+                 // Award attendance points once
+                 storage.addPoints(CONFIG.GAME.ATTENDANCE_POINTS || 10);
                  
                  window.app.hideLoading();
                  window.app.toast.show(`📅 출석 완료! ${tasksToAdd.length}개의 과제가 생성되었어요`, 'success');
@@ -644,20 +676,13 @@ class ArtQuestApp {
         document.getElementById('step-analyzing')?.classList.add('hidden');
         modal.classList.remove('hidden');
         
-        // Update onboarding callbacks to work from settings
-        if (window.app.onboarding) {
-          // Store original complete function
-          const originalComplete = window.app.onboarding.completeAssessment;
-          
-          // Override to refresh dashboard after completion
-          window.app.onboarding.completeAssessment = async function() {
-            await originalComplete();
-            // Refresh dashboard to show new strengths/weaknesses
-            if (window.app.dashboard) {
-              window.app.dashboard.render();
-            }
-          };
-        }
+        // Re-initialize onboarding to ensure all handlers work
+        window.app.startOnboarding();
+        
+        // Make sure we're on assessment step
+        document.getElementById('step-api')?.classList.add('hidden');
+        document.getElementById('step-assessment')?.classList.remove('hidden');
+        document.getElementById('step-analyzing')?.classList.add('hidden');
       }
     };
 

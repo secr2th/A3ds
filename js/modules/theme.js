@@ -36,10 +36,15 @@ class ThemeManager {
       }
     });
 
+    // Apply theme and font
     this.applyTheme();
     this.applyFont();
-    this.updateUI();
-    this.updateCustomFontsList();
+    
+    // Update UI only if we're on settings page
+    if (document.getElementById('font-select')) {
+      this.updateUI();
+      this.updateCustomFontsList();
+    }
 
     // 시스템 다크모드 변경 감지
     if (window.matchMedia) {
@@ -85,6 +90,12 @@ class ThemeManager {
     this.currentFont = select.value;
     this.saveThemeSettings();
     this.applyFont();
+    
+    // Force update the font immediately
+    document.documentElement.style.setProperty('--font-family',
+      `'${this.currentFont}', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`
+    );
+    
     window.app.toast.show(`✍️ ${this.currentFont} 폰트가 적용되었어요`, 'success');
   }
 

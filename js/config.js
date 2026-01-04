@@ -25,7 +25,8 @@ export const CONFIG = {
     POINTS_PER_TASK: 10,
     POINTS_PER_LEVEL: 100,
     STREAK_BONUS: 5,
-    POMODORO_POINTS: 5
+    POMODORO_POINTS: 5,
+    ATTENDANCE_POINTS: 10
   },
 
   // 타이머 기본값 (분)
