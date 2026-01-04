@@ -4,7 +4,7 @@
  * - 캐싱 전략: Cache-First for assets, Network-First for API
  */
 
-const CACHE_NAME = 'artquest-v1.0.0';
+const CACHE_NAME = 'artquest-v1.1.0';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
