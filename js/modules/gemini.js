@@ -28,7 +28,7 @@ class GeminiAPI {
       // Google Generative AI 클라이언트 초기화
       this.genAI = new GoogleGenerativeAI(key);
       // Gemini 2.0 Flash 모델 사용
-      this.model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+      this.model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash-exp' });
       console.log('✅ Gemini API 클라이언트 초기화 완료');
     } catch (error) {
       console.error('❌ Gemini API 초기화 실패:', error);
