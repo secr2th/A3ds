@@ -284,6 +284,7 @@ class ArtQuestApp {
                this.updateWeeklyGoals();
                this.updateStrengthsWeaknesses();
                this.updateRecommendedResources();
+               this.updateCustomLinks();
             }
          };
          this.dashboard.render();
