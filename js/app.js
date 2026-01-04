@@ -462,18 +462,60 @@ class ArtQuestApp {
     }
   }
 
+    /**
+   * 강점/약점 업데이트 (진단 결과에서만)
+   */
   updateStrengthsWeaknesses() {
     const analysis = storage.get('initial_analysis');
-    if (!analysis) return;
 
-    const fillList = (id, items) => {
-        const el = document.getElementById(id);
-        if(el && items) el.innerHTML = items.map(i => `<li>${i}</li>`).join('');
-    };
+    // 👇 분석 결과가 없으면 안내 메시지
+    if (!analysis) {
+      const strengthsList = document.getElementById('strengths-list');
+      const weaknessesList = document.getElementById('weaknesses-list');
 
-    fillList('strengths-list', analysis.strengths);
-    fillList('weaknesses-list', analysis.weaknesses);
+      if (strengthsList) {
+        strengthsList.innerHTML = '<li style="color: var(--text-tertiary);">실력 진단을 완료하면 표시됩니다</li>';
+      }
+      if (weaknessesList) {
+        weaknessesList.innerHTML = '<li style="color: var(--text-tertiary);">실력 진단을 완료하면 표시됩니다</li>';
+      }
+      return;
+    }
+
+    // 강점
+    const strengthsList = document.getElementById('strengths-list');
+    if (strengthsList && analysis.strengths) {
+      strengthsList.innerHTML = analysis.strengths
+        .map(s => `<li>${s}</li>`)
+        .join('');
+    }
+
+    // 약점
+    const weaknessesList = document.getElementById('weaknesses-list');
+    if (weaknessesList && analysis.weaknesses) {
+      weaknessesList.innerHTML = analysis.weaknesses
+        .map(w => `<li>${w}</li>`)
+        .join('');
+    }
+
+    // 👇 마지막 진단 날짜 표시 추가
+    const assessment = storage.getAssessment();
+    if (assessment && assessment.analyzedAt) {
+      const dateText = UTILS.getRelativeTime(assessment.analyzedAt);
+      const container = document.querySelector('.strength-weakness-grid');
+      if (container) {
+        let dateEl = container.querySelector('.analysis-date');
+        if (!dateEl) {
+          dateEl = document.createElement('small');
+          dateEl.className = 'analysis-date';
+          dateEl.style.cssText = 'grid-column: 1/-1; text-align: center; color: var(--text-tertiary); margin-top: 8px;';
+          container.appendChild(dateEl);
+        }
+        dateEl.textContent = `마지막 진단: ${dateText}`;
+      }
+    }
   }
+
 
   updateRecommendedResources() {
     const resources = storage.get('recommended_resources');
