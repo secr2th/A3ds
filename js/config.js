@@ -7,7 +7,7 @@
 
 export const CONFIG = {
   // Gemini API 설정
-  //GEMINI_API_ENDPOINT: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent',
+  GEMINI_API_ENDPOINT: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent',
 
   // 로컬 스토리지 키
   STORAGE_KEYS: {
