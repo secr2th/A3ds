@@ -158,6 +158,13 @@ class ArtQuestApp {
     this.onboarding = {
       currentStep: 'api',
 
+      closeModal: () => {
+        const modal = document.getElementById('onboarding-modal');
+        if (confirm('설정을 중단하시겠습니까? 나중에 설정에서 다시 진행할 수 있습니다.')) {
+          modal.classList.add('hidden');
+        }
+      },
+
       saveApiKey: () => {
         const input = document.getElementById('api-key-input');
         const apiKey = input.value.trim();
@@ -283,7 +290,54 @@ class ArtQuestApp {
                this.updateTodayTasks();
                this.updateWeeklyGoals();
                this.updateStrengthsWeaknesses();
-               this.updateRecommendedResources();
+               this.updateSocialLinks();
+            },
+            addSocialLink: () => {
+               const name = prompt('링크 이름 (예: 내 유튜브 채널):');
+               if (!name) return;
+               
+               const url = prompt('링크 URL:');
+               if (!url) return;
+               
+               const icons = {
+                 'youtube': '🎥',
+                 'twitter': '🐦',
+                 'instagram': '📷',
+                 'tiktok': '🎵',
+                 'blog': '✍️',
+                 'github': '💻',
+                 'portfolio': '🎨',
+                 'other': '🔗'
+               };
+               
+               const iconChoice = prompt(
+                 '아이콘을 선택하세요:\n1. YouTube (🎥)\n2. Twitter (🐦)\n3. Instagram (📷)\n4. TikTok (🎵)\n5. Blog (✍️)\n6. GitHub (💻)\n7. Portfolio (🎨)\n8. Other (🔗)'
+               );
+               
+               const iconMap = ['youtube', 'twitter', 'instagram', 'tiktok', 'blog', 'github', 'portfolio', 'other'];
+               const selectedIcon = icons[iconMap[parseInt(iconChoice) - 1]] || icons.other;
+               
+               const socialLinks = storage.get('social_links') || [];
+               socialLinks.push({
+                 id: UTILS.generateId(),
+                 name,
+                 url,
+                 icon: selectedIcon
+               });
+               
+               storage.set('social_links', socialLinks);
+               window.app.toast.show('✅ 링크가 추가되었어요!', 'success');
+               this.updateSocialLinks();
+            },
+            deleteSocialLink: (id) => {
+               if (!confirm('이 링크를 삭제하시겠어요?')) return;
+               
+               let socialLinks = storage.get('social_links') || [];
+               socialLinks = socialLinks.filter(link => link.id !== id);
+               storage.set('social_links', socialLinks);
+               
+               window.app.toast.show('🗑 링크가 삭제되었어요', 'success');
+               this.updateSocialLinks();
             }
          };
          this.dashboard.render();
@@ -398,7 +452,17 @@ class ArtQuestApp {
       return;
     }
 
-    container.innerHTML = list.slice(0, 5).map(res => `
+    // Get one resource per category, max 3 total
+    const categorizedResources = {};
+    list.forEach(res => {
+      if (!categorizedResources[res.category]) {
+        categorizedResources[res.category] = res;
+      }
+    });
+
+    const limitedResources = Object.values(categorizedResources).slice(0, 3);
+
+    container.innerHTML = limitedResources.map(res => `
       <a href="${res.url}" target="_blank" class="resource-item">
         <div class="resource-icon">${res.type === 'video' ? '🎥' : '📚'}</div>
         <div class="resource-content">
@@ -407,6 +471,41 @@ class ArtQuestApp {
         </div>
         <span class="resource-type">${res.type}</span>
       </a>`).join('');
+  }
+
+  updateSocialLinks() {
+    const socialLinks = storage.get('social_links') || [];
+    const container = document.getElementById('social-links');
+    if (!container) return;
+
+    if (socialLinks.length === 0) {
+      container.innerHTML = `
+        <div class="empty-social-links">
+          <div class="icon">🔗</div>
+          <p>아직 추가된 링크가 없어요</p>
+          <p style="font-size: 14px; margin-top: 8px;">유튜브, 트위터 등의 링크를 추가해보세요!</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = socialLinks.map(link => `
+      <div class="social-link-card">
+        <div class="social-link-icon">${link.icon}</div>
+        <div class="social-link-content">
+          <h4>${link.name}</h4>
+          <a href="${link.url}" target="_blank" rel="noopener noreferrer">${link.url}</a>
+        </div>
+        <div class="social-link-actions">
+          <button class="icon-btn" onclick="window.open('${link.url}', '_blank')" title="열기">
+            <span class="icon">🔗</span>
+          </button>
+          <button class="icon-btn" onclick="app.dashboard.deleteSocialLink('${link.id}')" title="삭제">
+            <span class="icon">🗑</span>
+          </button>
+        </div>
+      </div>
+    `).join('');
   }
 
   initSettings() {
@@ -486,6 +585,16 @@ class ArtQuestApp {
   hideLoading() {
     const loading = document.getElementById('loading');
     if (loading) loading.classList.add('hidden');
+  }
+
+  showAILoading() {
+    const modal = document.getElementById('ai-loading-modal');
+    if (modal) modal.classList.remove('hidden');
+  }
+
+  hideAILoading() {
+    const modal = document.getElementById('ai-loading-modal');
+    if (modal) modal.classList.add('hidden');
   }
 }
 

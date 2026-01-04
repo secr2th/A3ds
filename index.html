@@ -42,6 +42,7 @@
     -->
     <div id="onboarding-modal" class="modal hidden">
         <div class="modal-content">
+            <button class="close-btn" onclick="app.onboarding.closeModal()">✕</button>
             <h2>🎨 ArtQuest에 오신 것을 환영합니다!</h2>
             <p>AI 기반 맞춤 학습을 위해 설정을 시작해볼까요?</p>
 
@@ -306,12 +307,13 @@
                 </div>
             </section>
 
-            <!-- AI 추천 리소스 -->
+            <!-- 소셜 링크 -->
             <section class="section">
                 <div class="section-header">
-                    <h2>🎓 추천 학습 자료</h2>
+                    <h2>🔗 나의 링크</h2>
+                    <button class="btn-text" onclick="app.dashboard.addSocialLink()">추가</button>
                 </div>
-                <div id="recommended-resources" class="resource-list">
+                <div id="social-links" class="social-links-grid">
                     <!-- 동적으로 생성됨 -->
                 </div>
             </section>
@@ -678,13 +680,28 @@
                     </select>
                 </div>
                 <div class="setting-item">
-                    <label>커스텀 폰트 추가 (Google Fonts)</label>
-                    <div class="input-group">
-                        <input type="text" id="custom-font-input"
-                               placeholder="예: Roboto">
-                        <button class="btn-secondary" onclick="app.theme.addCustomFont()">추가</button>
+                    <label>커스텀 웹폰트 추가</label>
+                    <div style="margin-bottom: 12px;">
+                        <label style="font-size: 14px; color: var(--text-secondary);">폰트 이름</label>
+                        <input type="text" id="custom-font-name"
+                               placeholder="예: Paperlogy"
+                               style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); 
+                                      background: var(--bg-secondary); color: var(--text-primary); margin-top: 4px;">
                     </div>
-                    <small>Google Fonts에서 사용 가능한 폰트명을 입력하세요</small>
+                    <div style="margin-bottom: 12px;">
+                        <label style="font-size: 14px; color: var(--text-secondary);">@font-face CSS 코드</label>
+                        <textarea id="custom-font-code"
+                                  placeholder="@font-face { font-family: 'Paperlogy'; src: url('https://...'); }"
+                                  style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); 
+                                         background: var(--bg-secondary); color: var(--text-primary); min-height: 120px; 
+                                         font-family: monospace; font-size: 12px; margin-top: 4px;"></textarea>
+                    </div>
+                    <button class="btn-secondary" onclick="app.theme.addWebFont()">폰트 추가</button>
+                    <small>웹폰트 CSS 코드를 입력하면 사이트 내에서 사용할 수 있습니다</small>
+                </div>
+                <div class="setting-item" id="custom-fonts-list" style="display: none;">
+                    <label>등록된 커스텀 폰트</label>
+                    <div id="custom-fonts-container"></div>
                 </div>
             </section>
 
@@ -793,6 +810,15 @@
 
     <!-- Toast 알림 -->
     <div id="toast-container"></div>
+
+    <!-- AI 로딩 모달 -->
+    <div id="ai-loading-modal" class="modal hidden">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <div class="spinner" style="margin: 0 auto 20px;"></div>
+            <h3 style="margin-bottom: 12px;">🤖 AI가 답변을 생성중입니다...</h3>
+            <p style="color: var(--text-secondary); font-size: 14px;">잠시만 기다려주세요</p>
+        </div>
+    </div>
 
     <!-- JS 모듈 로드 -->
     <script type="module" src="js/app.js"></script>

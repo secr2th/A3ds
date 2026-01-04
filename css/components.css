@@ -521,11 +521,17 @@
   padding: var(--spacing-6);
   max-width: 600px;
   width: 100%;
-  max-height: 90vh;
+  max-height: 85vh;
   overflow-y: auto;
   position: relative;
   box-shadow: var(--shadow-lg);
   animation: slideUp var(--transition-base);
+}
+
+/* Assessment modal specific styling */
+#onboarding-modal .modal-content {
+  max-width: 700px;
+  max-height: 80vh;
 }
 
 @keyframes slideUp {
@@ -1070,4 +1076,96 @@ input:checked + .slider:before {
   .assessment-category label {
     font-size: var(--font-size-sm);
   }
+}
+
+/* ===== Social Links Grid ===== */
+.social-links-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--spacing-4);
+}
+
+.social-link-card {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-4);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.social-link-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--color-primary);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.social-link-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.social-link-card:hover::before {
+  opacity: 1;
+}
+
+.social-link-icon {
+  font-size: 32px;
+  flex-shrink: 0;
+}
+
+.social-link-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.social-link-content h4 {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--spacing-1);
+  color: var(--text-primary);
+}
+
+.social-link-content a {
+  font-size: var(--font-size-sm);
+  color: var(--color-primary);
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.social-link-content a:hover {
+  text-decoration: underline;
+}
+
+.social-link-actions {
+  display: flex;
+  gap: var(--spacing-2);
+  flex-shrink: 0;
+}
+
+.social-link-actions .icon-btn {
+  width: 32px;
+  height: 32px;
+  font-size: var(--font-size-base);
+}
+
+.empty-social-links {
+  text-align: center;
+  padding: var(--spacing-8);
+  color: var(--text-secondary);
+}
+
+.empty-social-links .icon {
+  font-size: 48px;
+  margin-bottom: var(--spacing-3);
+  opacity: 0.5;
 }

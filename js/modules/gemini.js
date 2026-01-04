@@ -56,6 +56,11 @@ class GeminiAPI {
       throw new Error('API 키가 설정되지 않았습니다.');
     }
 
+    // Show AI loading modal
+    if (window.app && window.app.showAILoading) {
+      window.app.showAILoading();
+    }
+
     const url = `${this.baseUrl}/${this.model}:generateContent?key=${apiKey}`;
 
     const payload = {
@@ -96,6 +101,11 @@ class GeminiAPI {
     } catch (error) {
       console.error('Gemini Request Failed:', error);
       throw error;
+    } finally {
+      // Hide AI loading modal
+      if (window.app && window.app.hideAILoading) {
+        window.app.hideAILoading();
+      }
     }
   }
 
