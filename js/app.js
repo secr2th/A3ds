@@ -487,7 +487,6 @@ class ArtQuestApp {
     const loading = document.getElementById('loading');
     if (loading) loading.classList.add('hidden');
   }
-}
 
   /**
    * 온보딩 닫기
