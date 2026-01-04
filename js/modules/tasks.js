@@ -128,13 +128,14 @@ class TaskManager {
 
     if (!task) return;
 
+    const wasCompleted = task.completed;
     task.completed = !task.completed;
     task.completedAt = task.completed ? new Date().toISOString() : null;
 
     storage.setTasks(tasks);
 
-    if (task.completed) {
-      // 포인트 추가
+    if (task.completed && !wasCompleted) {
+      // Task is newly completed - award points
       const points = CONFIG.GAME.POINTS_PER_TASK;
       storage.addPoints(points);
 
@@ -163,6 +164,23 @@ class TaskManager {
       const userData = storage.getUserData();
       userData.totalTasksCompleted += 1;
       storage.setUserData(userData);
+    } else if (!task.completed && wasCompleted) {
+      // Task was unchecked - remove points
+      const points = CONFIG.GAME.POINTS_PER_TASK;
+      const userData = storage.getUserData();
+      userData.points = Math.max(0, userData.points - points);
+      userData.totalTasksCompleted = Math.max(0, userData.totalTasksCompleted - 1);
+      storage.setUserData(userData);
+
+      // Update category progress
+      if (task.category) {
+        storage.updateCategoryProgress(task.category, -points);
+      }
+
+      window.app.toast.show(
+        `과제 완료 취소 -${points}점`,
+        'info'
+      );
     }
 
     this.render();
