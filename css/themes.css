@@ -44,3 +44,193 @@
   --color-primary-dark: #4f46e5;
   --color-primary-light: #818cf8;
 }
+
+  /**
+   * CSS 코드로 커스텀 폰트 추가
+   */
+  async addCustomFontFromCSS() {
+    const cssInput = document.getElementById('custom-font-css');
+    const nameInput = document.getElementById('custom-font-name');
+
+    if (!cssInput || !nameInput) return;
+
+    const cssCode = cssInput.value.trim();
+    const fontName = nameInput.value.trim();
+
+    if (!cssCode || !fontName) {
+      window.app.toast.show('CSS 코드와 폰트명을 모두 입력해주세요', 'warning');
+      return;
+    }
+
+    // CSS 유효성 간단 체크
+    if (!cssCode.includes('@font-face') || !cssCode.includes('font-family')) {
+      window.app.toast.show('올바른 @font-face 코드가 아닙니다', 'error');
+      return;
+    }
+
+    // 이미 추가된 폰트인지 체크
+    if (this.customFonts.some(f => f.name === fontName)) {
+      window.app.toast.show('이미 추가된 폰트예요', 'warning');
+      return;
+    }
+
+    try {
+      // CSS를 <style> 태그로 추가
+      const style = document.createElement('style');
+      style.id = `custom-font-${fontName.replace(/\s+/g, '-')}`;
+      style.textContent = cssCode;
+      document.head.appendChild(style);
+
+      // 폰트 로드 테스트
+      await document.fonts.load(`16px "${fontName}"`);
+
+      // 커스텀 폰트 리스트에 추가
+      this.customFonts.push({
+        name: fontName,
+        css: cssCode,
+        styleId: style.id
+      });
+
+      this.saveThemeSettings();
+      this.updateFontSelect();
+      this.updateCustomFontsList();
+
+      cssInput.value = '';
+      nameInput.value = '';
+
+      window.app.toast.show(`✅ ${fontName} 폰트가 추가되었어요!`, 'success');
+
+    } catch (error) {
+      console.error('Font load error:', error);
+      window.app.toast.show('폰트를 불러올 수 없어요', 'error');
+    }
+  }
+
+  /**
+   * 커스텀 폰트 삭제
+   */
+  removeCustomFont(fontName) {
+    if (confirm(`${fontName} 폰트를 삭제하시겠어요?`)) {
+      const fontData = this.customFonts.find(f => f.name === fontName);
+      if (fontData) {
+        // <style> 태그 제거
+        const style = document.getElementById(fontData.styleId);
+        if (style) style.remove();
+
+        // 리스트에서 제거
+        this.customFonts = this.customFonts.filter(f => f.name !== fontName);
+
+        // 현재 사용 중이면 기본 폰트로 변경
+        if (this.currentFont === fontName) {
+          this.currentFont = 'Pretendard';
+          this.applyFont();
+        }
+
+        this.saveThemeSettings();
+        this.updateFontSelect();
+        this.updateCustomFontsList();
+
+        window.app.toast.show(`${fontName} 폰트가 삭제되었어요`, 'success');
+      }
+    }
+  }
+
+  /**
+   * 커스텀 폰트 리스트 UI 업데이트
+   */
+  updateCustomFontsList() {
+    const container = document.getElementById('custom-fonts-list');
+    if (!container) return;
+
+    if (this.customFonts.length === 0) {
+      container.innerHTML = '<small style="color: var(--text-secondary);">등록된 커스텀 폰트가 없습니다</small>';
+      return;
+    }
+
+    container.innerHTML = this.customFonts.map(font => `
+      <div style="
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        background: var(--bg-secondary);
+        border-radius: 8px;
+      ">
+        <span style="font-family: '${font.name}', sans-serif; font-weight: 600;">
+          ${font.name}
+        </span>
+        <button class="btn-danger"
+                onclick="app.theme.removeCustomFont('${font.name}')"
+                style="padding: 4px 12px; font-size: 12px;">
+          삭제
+        </button>
+      </div>
+    `).join('');
+  }
+
+  /**
+   * 초기화 시 저장된 커스텀 폰트 로드
+   */
+  init() {
+    const settings = storage.getSettings();
+
+    if (settings.theme) {
+      this.currentColor = settings.theme.color || 'indigo';
+      this.currentMode = settings.theme.mode || 'auto';
+      this.currentFont = settings.theme.font || 'Pretendard';
+      this.customFonts = settings.theme.customFonts || [];
+    }
+
+    // 👇 저장된 커스텀 폰트들 다시 로드
+    this.customFonts.forEach(font => {
+      const style = document.createElement('style');
+      style.id = font.styleId;
+      style.textContent = font.css;
+      document.head.appendChild(style);
+    });
+
+    this.applyTheme();
+    this.applyFont();
+    this.updateUI();
+
+    if (window.matchMedia) {
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        if (this.currentMode === 'auto') this.applyTheme();
+      });
+    }
+  }
+
+        updateFontSelect() {
+    const select = document.getElementById('font-select');
+    if (!select) return;
+
+    const defaultFonts = ['Pretendard', 'Noto Sans KR', 'Nanum Gothic', 'Nanum Myeongjo'];
+
+    // 👇 customFonts는 이제 객체 배열이므로 .map으로 이름 추출
+    const customFontNames = this.customFonts.map(f => f.name);
+    const allFonts = [...defaultFonts, ...customFontNames];
+
+    select.innerHTML = allFonts.map(font =>
+      `<option value="${font}" ${font === this.currentFont ? 'selected' : ''}>
+        ${font}${customFontNames.includes(font) ? ' (커스텀)' : ''}
+      </option>`
+    ).join('');
+  }
+
+  updateUI() {
+    // 컬러 버튼 활성화 상태
+    document.querySelectorAll('.color-btn').forEach(btn => {
+      const color = btn.getAttribute('data-color');
+      btn.classList.toggle('active', color === this.currentColor);
+    });
+
+    // 모드 버튼 활성화 상태
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      const mode = btn.getAttribute('data-mode');
+      btn.classList.toggle('active', mode === this.currentMode);
+    });
+
+    this.updateFontSelect();
+    this.updateCustomFontsList(); // 👈 추가
+  }
+
