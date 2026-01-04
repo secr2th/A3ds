@@ -1,71 +1,30 @@
 import storage from './storage.js';
-
 class ThemeManager {
-  constructor() { this.currentColor = 'indigo'; this.currentMode = 'auto'; this.currentFont = 'Pretendard'; this.customFonts = []; }
-
   init() {
-    const settings = storage.getSettings().theme || {};
-    this.currentColor = settings.color || 'indigo'; this.currentMode = settings.mode || 'auto';
-    this.currentFont = settings.font || 'Pretendard'; this.customFonts = settings.customFonts || [];
-    this.applyTheme(); this.injectCustomFontStyles(); this.applyFont(); this.updateUI();
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if(this.currentMode==='auto') this.applyTheme(); });
+    const s = storage.getSettings().theme || {}; this.color=s.color||'indigo'; this.mode=s.mode||'auto'; this.font=s.font||'Pretendard'; this.customFonts=s.customFonts||[];
+    this.applyTheme(); this.injectCustomFonts(); this.applyFont(); this.updateUI();
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>this.mode==='auto'&&this.applyTheme());
   }
-
-  changeColor(c) { this.currentColor=c; this.save(); this.applyTheme(); this.updateUI(); }
-  changeMode(m) { this.currentMode=m; this.save(); this.applyTheme(); this.updateUI(); }
-  changeFont() { this.currentFont = document.getElementById('font-select').value; this.save(); this.applyFont(); }
-
-  // FIX 6: @font-face 코드로 폰트 추가
-  addCustomFont() {
-    const textarea = document.getElementById('custom-font-input');
-    const cssCode = textarea.value.trim();
-    if (!cssCode.startsWith('@font-face')) {
-      window.app.toast.show('올바른 @font-face 코드를 입력하세요.', 'warning'); return;
-    }
-    const match = cssCode.match(/font-family:\s*['"](.+?)['"]/);
-    if (!match || !match[1]) {
-      window.app.toast.show('font-family를 찾을 수 없습니다.', 'warning'); return;
-    }
-    const fontName = match[1];
-    if (this.customFonts.some(f => f.name === fontName)) {
-      window.app.toast.show('이미 추가된 폰트 이름입니다.', 'warning'); return;
-    }
-
-    this.customFonts.push({ name: fontName, css: cssCode });
-    this.save();
-    this.injectCustomFontStyles();
-    this.updateFontSelect();
-    textarea.value = '';
-    window.app.toast.show(`✅ '${fontName}' 폰트가 추가되었습니다.`, 'success');
+  save(){ storage.updateSettings({theme:{color:this.color, mode:this.mode, font:this.font, customFonts:this.customFonts}}); }
+  changeColor(c){ this.color=c; this.save(); this.applyTheme(); this.updateUI(); }
+  changeMode(m){ this.mode=m; this.save(); this.applyTheme(); this.updateUI(); }
+  changeFont(){ this.font=document.getElementById('font-select').value; this.save(); this.applyFont(); }
+  addCustomFont(){
+    const css = document.getElementById('custom-font-input').value.trim();
+    const nameMatch = css.match(/font-family:\s*['"](.+?)['"]/); if(!nameMatch) return;
+    const name = nameMatch[1];
+    if(!this.customFonts.some(f=>f.name===name)) this.customFonts.push({name,css});
+    this.save(); this.injectCustomFonts(); this.updateUI();
   }
-
-  injectCustomFontStyles() {
-    const styleEl = document.getElementById('custom-font-styles');
-    if(styleEl) styleEl.innerHTML = this.customFonts.map(f => f.css).join('\n');
-  }
-
-  applyTheme() {
-    const root = document.documentElement;
-    root.setAttribute('data-color', this.currentColor);
-    this.currentMode === 'auto' ? root.removeAttribute('data-theme') : root.setAttribute('data-theme', this.currentMode);
-  }
-
-  applyFont() { document.documentElement.style.setProperty('--font-family', `'${this.currentFont}', sans-serif`); }
-  save() { storage.updateSettings({ theme: { color: this.currentColor, mode: this.currentMode, font: this.currentFont, customFonts: this.customFonts } }); }
-
-  updateUI() {
-    document.querySelectorAll('.color-btn').forEach(b => b.classList.toggle('active', b.dataset.color === this.currentColor));
-    document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === this.currentMode));
-    this.updateFontSelect();
-  }
-
-  updateFontSelect() {
-    const select = document.getElementById('font-select');
-    if (!select) return;
-    const defaultFonts = ['Pretendard', 'Noto Sans KR', 'Nanum Gothic'];
-    const customFontNames = this.customFonts.map(f => f.name);
-    const allFonts = [...new Set([...defaultFonts, ...customFontNames])];
-    select.innerHTML = allFonts.map(f => `<option value="${f}" ${f===this.currentFont ? 'selected' : ''}>${f}</option>`).join('');
+  injectCustomFonts(){ document.getElementById('custom-font-styles').innerHTML=this.customFonts.map(f=>f.css).join(''); }
+  applyTheme(){ const r=document.documentElement; r.setAttribute('data-color',this.color); this.mode==='auto'?r.removeAttribute('data-theme'):r.setAttribute('data-theme',this.mode); }
+  applyFont(){ document.documentElement.style.setProperty('--font-family',`'${this.font}', sans-serif`); }
+  updateUI(){
+    document.querySelectorAll('.color-btn').forEach(b=>b.classList.toggle('active',b.dataset.color===this.color));
+    document.querySelectorAll('.mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===this.mode));
+    const select=document.getElementById('font-select'); if(!select)return;
+    const fonts=['Pretendard',...this.customFonts.map(f=>f.name)];
+    select.innerHTML=fonts.map(f=>`<option value="${f}" ${f===this.font?'selected':''}>${f}</option>`).join('');
   }
 }
 export default new ThemeManager();
