@@ -398,6 +398,17 @@ class ArtQuestApp {
       return;
     }
 
+    // 👇 카테고리별로 그룹화하여 각 1개씩만 선택
+    const categoryMap = {};
+    list.forEach(res => {
+      if (!categoryMap[res.category]) {
+        categoryMap[res.category] = res;
+      }
+    });
+
+    // 최대 3개만 추출
+    const uniqueResources = Object.values(categoryMap).slice(0, 3);
+
     container.innerHTML = list.slice(0, 5).map(res => `
       <a href="${res.url}" target="_blank" class="resource-item">
         <div class="resource-icon">${res.type === 'video' ? '🎥' : '📚'}</div>
