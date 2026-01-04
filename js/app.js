@@ -502,6 +502,23 @@ class ArtQuestApp {
   }
 }
 
+  /**
+   * AI 로딩 표시
+   */
+  showAILoading() {
+    const overlay = document.getElementById('ai-loading-overlay');
+    if (overlay) overlay.classList.remove('hidden');
+  }
+
+  /**
+   * AI 로딩 숨김
+   */
+  hideAILoading() {
+    const overlay = document.getElementById('ai-loading-overlay');
+    if (overlay) overlay.classList.add('hidden');
+  }
+
+
 // 앱 인스턴스 생성 및 전역 할당 (DOM 로드 전이라도 안전하게)
 const app = new ArtQuestApp();
 window.app = app;
