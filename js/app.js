@@ -21,7 +21,7 @@ class ArtQuestApp {
     this.currentView = null;
     this.isInitialized = false;
 
-    // 모듈들을 전역으로 접근 가능하게
+    // 모듈들을 전역으로 접근 가능하게 설정
     this.storage = storage;
     this.gemini = gemini;
     this.tasks = tasks;
@@ -30,11 +30,17 @@ class ArtQuestApp {
     this.notifications = notifications;
     this.timer = timer;
     this.theme = theme;
+
+    // UI 관련 객체 초기화 (null 방지)
     this.onboarding = null;
     this.dashboard = null;
     this.settings = null;
     this.router = null;
-    this.toast = null;
+
+    // Toast를 미리 안전한 객체로 초기화 (에러 발생 시 대비)
+    this.toast = {
+      show: (msg) => console.log('Toast not ready:', msg)
+    };
   }
 
   /**
@@ -44,19 +50,33 @@ class ArtQuestApp {
     try {
       console.log('🎨 ArtQuest 초기화 시작...');
 
-      // Service Worker 등록
-      this.registerServiceWorker();
-
-      // 유틸리티 모듈 초기화
+      // 1. 유틸리티부터 초기화 (Toast 사용 가능하게)
       this.initToast();
+
+      // 2. 라우터 준비
       this.initRouter();
 
-      // 테마 먼저 적용
+      // 3. Service Worker (에러가 나도 앱은 멈추지 않게 처리)
+      try {
+        this.registerServiceWorker();
+      } catch (swError) {
+        console.warn('Service Worker 등록 실패 (무시됨):', swError);
+      }
+
+      // 4. 테마 적용
       theme.init();
 
-      // 온보딩 체크
-      const apiKey = storage.getApiKey();
-      const assessment = storage.getAssessment();
+      // 5. 온보딩 체크
+      // 로컬 스토리지 접근이 차단된 경우를 대비해 try-catch
+      let apiKey = null;
+      let assessment = null;
+
+      try {
+        apiKey = storage.getApiKey();
+        assessment = storage.getAssessment();
+      } catch (e) {
+        console.error('Storage access error:', e);
+      }
 
       if (!apiKey || !assessment) {
         // 온보딩 필요
@@ -70,10 +90,17 @@ class ArtQuestApp {
 
       this.isInitialized = true;
       console.log('✅ ArtQuest 초기화 완료');
+
     } catch (error) {
-      console.error('앱 초기화 오류:', error);
+      console.error('❌ 앱 초기화 치명적 오류:', error);
       this.hideLoading();
-      this.toast.show('앱 초기화에 실패했어요', 'error');
+
+      // Toast가 작동하지 않을 경우를 대비해 alert 사용
+      if (this.toast && typeof this.toast.show === 'function') {
+        this.toast.show(`앱 실행 중 문제가 발생했습니다: ${error.message}`, 'error');
+      } else {
+        alert(`앱 실행 실패: ${error.message}`);
+      }
     }
   }
 
@@ -81,21 +108,27 @@ class ArtQuestApp {
    * 앱 메인 초기화
    */
   async initializeApp() {
-    // 알림 초기화
-    notifications.init();
+    try {
+      // 알림 초기화
+      notifications.init();
 
-    // 타이머 초기화
-    timer.init();
+      // 타이머 초기화
+      timer.init();
 
-    // 대시보드로 이동
-    this.hideLoading();
-    this.navigate('dashboard');
+      // 대시보드로 이동
+      this.hideLoading();
+      this.navigate('dashboard');
 
-    // 네비게이션 표시
-    document.getElementById('main-nav')?.classList.remove('hidden');
+      // 네비게이션 표시
+      const nav = document.getElementById('main-nav');
+      if (nav) nav.classList.remove('hidden');
 
-    // 일일 과제 체크
-    await tasks.checkAndGenerateDailyTasks();
+      // 일일 과제 체크
+      await tasks.checkAndGenerateDailyTasks();
+    } catch (error) {
+      console.error('initializeApp 내부 오류:', error);
+      throw error; // 상위 init의 catch로 전달
+    }
   }
 
   /**
@@ -105,8 +138,8 @@ class ArtQuestApp {
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/service-worker.js')
-          .then(reg => console.log('✅ Service Worker 등록 완료:', reg))
-          .catch(err => console.log('❌ Service Worker 등록 실패:', err));
+          .then(reg => console.log('✅ Service Worker 등록 완료'))
+          .catch(err => console.log('⚠️ Service Worker 등록 실패:', err));
       });
     }
   }
@@ -116,39 +149,33 @@ class ArtQuestApp {
    */
   startOnboarding() {
     const modal = document.getElementById('onboarding-modal');
+    if (!modal) {
+      console.error('DOM Error: #onboarding-modal not found');
+      return;
+    }
     modal.classList.remove('hidden');
 
-    // 온보딩 모듈 초기화
     this.onboarding = {
       currentStep: 'api',
 
-      /**
-       * API 키 저장
-       */
       saveApiKey: () => {
         const input = document.getElementById('api-key-input');
         const apiKey = input.value.trim();
 
         if (!apiKey) {
-          window.app.toast.show('API 키를 입력해주세요', 'warning');
+          this.toast.show('API 키를 입력해주세요', 'warning');
           return;
         }
 
-        // API 키 저장 및 설정
         storage.setApiKey(apiKey);
         gemini.setApiKey(apiKey);
 
-        // 다음 단계로
-        document.getElementById('step-api').classList.add('hidden');
-        document.getElementById('step-assessment').classList.remove('hidden');
-        this.currentStep = 'assessment';
+        document.getElementById('step-api')?.classList.add('hidden');
+        document.getElementById('step-assessment')?.classList.remove('hidden');
+        this.onboarding.currentStep = 'assessment';
       },
 
-      /**
-       * 실력 진단 완료
-       */
       completeAssessment: async () => {
-        // 모든 카테고리 선택 체크
         const categories = ['basic', 'anatomy', 'perspective', 'shading', 'color', 'composition'];
         const assessment = {};
         let allSelected = true;
@@ -163,60 +190,39 @@ class ArtQuestApp {
         });
 
         if (!allSelected) {
-          window.app.toast.show('모든 항목을 선택해주세요', 'warning');
+          this.toast.show('모든 항목을 선택해주세요', 'warning');
           return;
         }
 
-        // 평가 결과 저장
         storage.setAssessment(assessment);
 
-        // 분석 단계로
-        document.getElementById('step-assessment').classList.add('hidden');
-        document.getElementById('step-analyzing').classList.remove('hidden');
+        document.getElementById('step-assessment')?.classList.add('hidden');
+        document.getElementById('step-analyzing')?.classList.remove('hidden');
 
         try {
-          // AI 분석
           const analysis = await gemini.analyzeAssessment(assessment);
+          await this.onboarding.generateInitialData(assessment, analysis);
 
-          // 초기 데이터 생성
-          await this.generateInitialData(assessment, analysis);
-
-          // 온보딩 완료
           modal.classList.add('hidden');
-          window.app.toast.show('🎉 환영합니다! 학습을 시작해볼까요?', 'success');
+          this.toast.show('🎉 환영합니다! 학습을 시작해볼까요?', 'success');
+          await this.initializeApp();
 
-          // 앱 초기화
-          await window.app.initializeApp();
         } catch (error) {
           console.error('분석 오류:', error);
-          window.app.toast.show('분석에 실패했어요. API 키를 확인해주세요', 'error');
-
-          // 첫 단계로 돌아가기
-          document.getElementById('step-analyzing').classList.add('hidden');
-          document.getElementById('step-api').classList.remove('hidden');
+          this.toast.show('분석 실패. API 키를 확인해주세요.', 'error');
+          document.getElementById('step-analyzing')?.classList.add('hidden');
+          document.getElementById('step-api')?.classList.remove('hidden');
         }
       },
 
-      /**
-       * 초기 데이터 생성
-       */
       generateInitialData: async (assessment, analysis) => {
-        // 사용자 데이터 초기화
         const userData = storage.getUserData();
         userData.joinDate = new Date().toISOString();
         storage.setUserData(userData);
-
-        // 일일 과제 생성
         await tasks.generateDailyTasks();
-
-        // 주간 목표 생성
         await tasks.generateWeeklyGoals();
-
-        // 학습 리소스 추천
         const resources = await gemini.recommendResources(assessment);
         storage.set('recommended_resources', resources);
-
-        // 분석 결과 저장
         storage.set('initial_analysis', analysis);
       }
     };
@@ -227,86 +233,65 @@ class ArtQuestApp {
    */
   initRouter() {
     this.router = {
-      /**
-       * 뷰 전환
-       */
       navigate: (view) => {
         console.log(`📍 Navigation: ${view}`);
-
-        // 현재 뷰 저장
         window.app.currentView = view;
 
-        // 네비게이션 활성화 상태
         document.querySelectorAll('.nav-item').forEach(item => {
-          const itemView = item.getAttribute('data-view');
-          if (itemView === view) {
-            item.classList.add('active');
-          } else {
-            item.classList.remove('active');
-          }
+          if (item.getAttribute('data-view') === view) item.classList.add('active');
+          else item.classList.remove('active');
         });
 
-        // 뷰 렌더링
-        this.renderView(view);
+        this.router.renderView(view);
       },
 
-      /**
-       * 뷰 렌더링
-       */
       renderView: (view) => {
         const appContainer = document.getElementById('app');
         const template = document.getElementById(`${view}-template`);
 
         if (!template) {
-          console.error(`템플릿을 찾을 수 없음: ${view}`);
+          console.error(`❌ Template not found: #${view}-template`);
+          this.toast.show(`화면을 불러올 수 없습니다 (${view})`, 'error');
           return;
         }
 
-        // 템플릿 복제 및 삽입
         const content = template.content.cloneNode(true);
         appContainer.innerHTML = '';
         appContainer.appendChild(content);
 
-        // 뷰별 초기화
-        switch (view) {
-          case 'dashboard':
-            window.app.initDashboard();
-            break;
-          case 'tasks':
-            tasks.init();
-            break;
-          case 'gallery':
-            gallery.init();
-            break;
-          case 'analytics':
-            analytics.init();
-            break;
-          case 'settings':
-            window.app.initSettings();
-            break;
+        // 뷰별 초기화 (안전하게 처리)
+        try {
+            switch (view) {
+              case 'dashboard': this.initDashboard(); break;
+              case 'tasks': tasks.init(); break;
+              case 'gallery': gallery.init(); break;
+              case 'analytics': analytics.init(); break;
+              case 'settings': this.initSettings(); break;
+            }
+        } catch(viewError) {
+             console.error(`View Init Error (${view}):`, viewError);
         }
 
-        // 스크롤 맨 위로
         window.scrollTo(0, 0);
+      },
+
+      // 대시보드 로직을 라우터 내부에 연결
+      initDashboard: () => {
+         this.dashboard = {
+            render: () => {
+               this.updateUserStats();
+               this.updateTodayTasks();
+               this.updateWeeklyGoals();
+               this.updateStrengthsWeaknesses();
+               this.updateRecommendedResources();
+            }
+         };
+         this.dashboard.render();
       }
     };
-  }
 
-  /**
-   * 대시보드 초기화
-   */
-  initDashboard() {
-    this.dashboard = {
-      render: () => {
-        this.updateUserStats();
-        this.updateTodayTasks();
-        this.updateWeeklyGoals();
-        this.updateStrengthsWeaknesses();
-        this.updateRecommendedResources();
-      }
-    };
-
-    this.dashboard.render();
+    // 메서드 직접 연결 (bind 문제 해결)
+    this.initDashboard = this.router.initDashboard;
   }
 
   /**
@@ -314,20 +299,17 @@ class ArtQuestApp {
    */
   updateUserStats() {
     const userData = storage.getUserData();
+    if (!userData) return;
 
-    // 포인트
-    const pointsEl = document.getElementById('total-points');
-    if (pointsEl) pointsEl.textContent = userData.points;
+    const setContent = (id, text) => {
+       const el = document.getElementById(id);
+       if(el) el.textContent = text;
+    };
 
-    // 연속 일수
-    const streakEl = document.getElementById('streak-days');
-    if (streakEl) streakEl.textContent = userData.streak;
+    setContent('total-points', userData.points);
+    setContent('streak-days', userData.streak);
+    setContent('level-display', `Lv.${userData.level}`);
 
-    // 레벨
-    const levelEl = document.getElementById('level-display');
-    if (levelEl) levelEl.textContent = `Lv.${userData.level}`;
-
-    // 레벨 진행도
     const pointsPerLevel = CONFIG.GAME.POINTS_PER_LEVEL;
     const currentLevelPoints = userData.points % pointsPerLevel;
     const progressPercent = (currentLevelPoints / pointsPerLevel) * 100;
@@ -335,10 +317,7 @@ class ArtQuestApp {
     const progressEl = document.getElementById('level-progress');
     if (progressEl) progressEl.style.width = `${progressPercent}%`;
 
-    const pointsToNextEl = document.getElementById('points-to-next');
-    if (pointsToNextEl) {
-      pointsToNextEl.textContent = pointsPerLevel - currentLevelPoints;
-    }
+    setContent('points-to-next', pointsPerLevel - currentLevelPoints);
   }
 
   /**
@@ -347,33 +326,22 @@ class ArtQuestApp {
   updateTodayTasks() {
     const allTasks = storage.getTasks();
     const today = UTILS.formatDate(new Date());
-
-    const todayTasks = allTasks.daily.filter(t =>
-      UTILS.formatDate(t.date || t.createdAt) === today
-    );
-
+    const todayTasks = allTasks.daily.filter(t => UTILS.formatDate(t.date || t.createdAt) === today);
     const completed = todayTasks.filter(t => t.completed).length;
 
-    // 카운트 업데이트
     const countEl = document.getElementById('today-task-count');
     if (countEl) countEl.textContent = `${completed}/${todayTasks.length}`;
 
-    // 과제 리스트 렌더링
     const container = document.getElementById('today-tasks');
     if (!container) return;
 
     if (todayTasks.length === 0) {
-      container.innerHTML = `
-        <div style="text-align: center; padding: 20px; color: var(--text-secondary);">
-          오늘의 과제가 아직 없어요
-        </div>
-      `;
+      container.innerHTML = '<div class="text-center p-4" style="color:var(--text-secondary)">오늘의 과제가 아직 없어요</div>';
       return;
     }
 
     container.innerHTML = todayTasks.slice(0, 3).map(task => `
-      <div class="task-item ${task.completed ? 'completed' : ''}"
-           onclick="app.tasks.toggleTask('daily', '${task.id}')">
+      <div class="task-item ${task.completed ? 'completed' : ''}" onclick="app.tasks.toggleTask('daily', '${task.id}')">
         <div class="task-checkbox"></div>
         <div class="task-icon">${CONFIG.CATEGORIES[task.category]?.icon || '📝'}</div>
         <div class="task-content">
@@ -385,13 +353,9 @@ class ArtQuestApp {
     `).join('');
   }
 
-  /**
-   * 주간 목표 업데이트
-   */
   updateWeeklyGoals() {
     const allTasks = storage.getTasks();
-    const weeklyGoals = allTasks.weekly;
-
+    const weeklyGoals = allTasks.weekly || [];
     if (weeklyGoals.length === 0) return;
 
     const firstGoal = weeklyGoals[0];
@@ -400,184 +364,104 @@ class ArtQuestApp {
     if (goalCard && firstGoal) {
       const icon = CONFIG.CATEGORIES[firstGoal.category]?.icon || '🎯';
       const progress = (firstGoal.progress / firstGoal.targetCount) * 100;
-
       goalCard.innerHTML = `
         <div class="goal-icon">${icon}</div>
         <div class="goal-content">
           <h4>${firstGoal.title}</h4>
           <p>${firstGoal.description}</p>
-          <div class="progress-bar small">
-            <div class="progress-fill" style="width: ${progress}%"></div>
-          </div>
-        </div>
-      `;
+          <div class="progress-bar small"><div class="progress-fill" style="width: ${progress}%"></div></div>
+        </div>`;
     }
   }
 
-  /**
-   * 강점/약점 업데이트
-   */
   updateStrengthsWeaknesses() {
     const analysis = storage.get('initial_analysis');
-
     if (!analysis) return;
 
-    // 강점
-    const strengthsList = document.getElementById('strengths-list');
-    if (strengthsList && analysis.strengths) {
-      strengthsList.innerHTML = analysis.strengths
-        .map(s => `<li>${s}</li>`)
-        .join('');
-    }
+    const fillList = (id, items) => {
+        const el = document.getElementById(id);
+        if(el && items) el.innerHTML = items.map(i => `<li>${i}</li>`).join('');
+    };
 
-    // 약점
-    const weaknessesList = document.getElementById('weaknesses-list');
-    if (weaknessesList && analysis.weaknesses) {
-      weaknessesList.innerHTML = analysis.weaknesses
-        .map(w => `<li>${w}</li>`)
-        .join('');
-    }
+    fillList('strengths-list', analysis.strengths);
+    fillList('weaknesses-list', analysis.weaknesses);
   }
 
-  /**
-   * 추천 리소스 업데이트
-   */
   updateRecommendedResources() {
     const resources = storage.get('recommended_resources');
     const container = document.getElementById('recommended-resources');
+    if (!container) return;
 
-    if (!container || !resources) return;
-
-    const resourcesList = resources.resources || [];
-
-    if (resourcesList.length === 0) {
-      container.innerHTML = `
-        <div style="text-align: center; padding: 20px; color: var(--text-secondary);">
-          추천 자료를 불러오는 중...
-        </div>
-      `;
+    const list = resources?.resources || [];
+    if (list.length === 0) {
+      container.innerHTML = '<div class="text-center p-4">추천 자료를 불러오는 중...</div>';
       return;
     }
 
-    container.innerHTML = resourcesList.slice(0, 5).map(resource => `
-      <a href="${resource.url}" target="_blank" class="resource-item">
-        <div class="resource-icon">
-          ${resource.type === 'video' ? '🎥' : resource.type === 'article' ? '📄' : '📚'}
-        </div>
+    container.innerHTML = list.slice(0, 5).map(res => `
+      <a href="${res.url}" target="_blank" class="resource-item">
+        <div class="resource-icon">${res.type === 'video' ? '🎥' : '📚'}</div>
         <div class="resource-content">
-          <h4>${resource.title}</h4>
-          <p>${resource.description}</p>
+          <h4>${res.title}</h4>
+          <p>${res.description}</p>
         </div>
-        <span class="resource-type">${resource.type}</span>
-      </a>
-    `).join('');
+        <span class="resource-type">${res.type}</span>
+      </a>`).join('');
   }
 
-  /**
-   * 설정 초기화
-   */
   initSettings() {
     this.settings = {
-      /**
-       * API 키 업데이트
-       */
-      updateApiKey: async () => {
+      updateApiKey: () => {
         const input = document.getElementById('settings-api-key');
         const newKey = input.value.trim();
-
-        if (!newKey) {
-          window.app.toast.show('API 키를 입력해주세요', 'warning');
-          return;
-        }
+        if (!newKey) return this.toast.show('API 키를 입력해주세요', 'warning');
 
         storage.setApiKey(newKey);
         gemini.setApiKey(newKey);
-        window.app.toast.show('✅ API 키가 업데이트되었어요', 'success');
+        this.toast.show('✅ API 키가 업데이트되었어요', 'success');
         input.value = '';
       },
-
-      /**
-       * API 연결 테스트
-       */
       testApiConnection: async () => {
-        window.app.showLoading('API 연결을 테스트하고 있어요...');
-
+        this.showLoading('연결 테스트 중...');
         try {
           const result = await gemini.testConnection();
-
-          window.app.hideLoading();
-
-          if (result) {
-            window.app.toast.show('✅ API 연결 성공!', 'success');
-          } else {
-            window.app.toast.show('❌ API 연결 실패', 'error');
-          }
-        } catch (error) {
-          window.app.hideLoading();
-          window.app.toast.show('❌ API 연결 실패', 'error');
+          this.hideLoading();
+          result ? this.toast.show('✅ 연결 성공!', 'success') : this.toast.show('❌ 연결 실패', 'error');
+        } catch {
+          this.hideLoading();
+          this.toast.show('❌ 연결 실패', 'error');
         }
       },
-
-      /**
-       * 실력 재진단
-       */
       reopenAssessment: () => {
-        if (confirm('실력을 다시 진단하시겠어요? 기존 데이터는 유지됩니다.')) {
-          const modal = document.getElementById('onboarding-modal');
-
-          // API 단계는 건너뛰고 평가 단계로
-          document.getElementById('step-api').classList.add('hidden');
-          document.getElementById('step-assessment').classList.remove('hidden');
-          document.getElementById('step-analyzing').classList.add('hidden');
-
-          // 기존 평가 데이터 불러오기
-          const currentAssessment = storage.getAssessment();
-          if (currentAssessment) {
-            Object.entries(currentAssessment).forEach(([category, level]) => {
-              const radio = document.querySelector(`input[name="${category}"][value="${level}"]`);
-              if (radio) radio.checked = true;
-            });
-          }
-
-          modal.classList.remove('hidden');
-        }
+        if (!confirm('다시 진단하시겠어요?')) return;
+        const modal = document.getElementById('onboarding-modal');
+        document.getElementById('step-api')?.classList.add('hidden');
+        document.getElementById('step-assessment')?.classList.remove('hidden');
+        document.getElementById('step-analyzing')?.classList.add('hidden');
+        modal.classList.remove('hidden');
       }
     };
 
-    // 현재 API 키 상태 표시
-    const apiKeyInput = document.getElementById('settings-api-key');
+    const keyInput = document.getElementById('settings-api-key');
     const currentKey = storage.getApiKey();
-    if (apiKeyInput && currentKey) {
-      apiKeyInput.placeholder = '현재 API 키: ' + currentKey.substring(0, 10) + '...';
-    }
+    if(keyInput && currentKey) keyInput.placeholder = `현재 키: ${currentKey.slice(0,10)}...`;
   }
 
-  /**
-   * Toast 알림 초기화
-   */
   initToast() {
     this.toast = {
       show: (message, type = 'info') => {
         const container = document.getElementById('toast-container');
-        if (!container) return;
+        if (!container) {
+            console.warn(`Toast container missing. Msg: ${message}`);
+            return;
+        }
 
-        const icons = {
-          success: '✅',
-          error: '❌',
-          warning: '⚠️',
-          info: 'ℹ️'
-        };
-
+        const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
-        toast.innerHTML = `
-          <div class="toast-icon">${icons[type] || icons.info}</div>
-          <div class="toast-message">${message}</div>
-        `;
+        toast.innerHTML = `<div class="toast-icon">${icons[type] || icons.info}</div><div class="toast-message">${message}</div>`;
 
         container.appendChild(toast);
-
-        // 3초 후 제거
         setTimeout(() => {
           toast.style.opacity = '0';
           setTimeout(() => toast.remove(), 300);
@@ -586,40 +470,30 @@ class ArtQuestApp {
     };
   }
 
-  /**
-   * 네비게이션
-   */
   navigate(view) {
-    this.router.navigate(view);
+    if(this.router) this.router.navigate(view);
   }
 
-  /**
-   * 로딩 표시
-   */
   showLoading(message = 'Loading...') {
     const loading = document.getElementById('loading');
     if (loading) {
-      loading.querySelector('p').textContent = message;
+      const p = loading.querySelector('p');
+      if(p) p.textContent = message;
       loading.classList.remove('hidden');
     }
   }
 
-  /**
-   * 로딩 숨김
-   */
   hideLoading() {
     const loading = document.getElementById('loading');
-    if (loading) {
-      loading.classList.add('hidden');
-    }
+    if (loading) loading.classList.add('hidden');
   }
 }
 
-// 앱 인스턴스 생성 및 전역 접근
+// 앱 인스턴스 생성 및 전역 할당 (DOM 로드 전이라도 안전하게)
 const app = new ArtQuestApp();
 window.app = app;
 
-// DOM 로드 후 초기화
+// 실행
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => app.init());
 } else {
