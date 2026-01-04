@@ -795,6 +795,15 @@
     <!-- Toast 알림 -->
     <div id="toast-container"></div>
 
+    <!-- 👇 AI 로딩 오버레이 추가 -->
+    <div id="ai-loading-overlay" class="modal hidden" style="z-index: 2000;">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <div class="spinner" style="margin: 0 auto 20px;"></div>
+            <h3>🤖 AI가 답변을 생성중입니다...</h3>
+            <p style="color: var(--text-secondary); margin-top: 12px;">잠시만 기다려주세요</p>
+        </div>
+    </div>
+
     <!-- JS 모듈 로드 -->
     <script type="module" src="js/app.js"></script>
 </body>
