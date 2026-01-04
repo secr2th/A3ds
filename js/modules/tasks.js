@@ -92,6 +92,8 @@ class TaskManager {
     }
   }
 
+
+  
   /**
    * 오늘 출석 여부에 따라 버튼 상태 업데이트
    */
@@ -125,7 +127,57 @@ class TaskManager {
       UTILS.formatDate(t.createdAt) === today
     );
 
-    if (todayTasks.length === 0) {
+    if (todayTasks.length ===  /**
+   * 주간 목표 갱신 (수동)
+   */
+  async refreshWeeklyGoals() {
+    if (!confirm('주간 목표를 새로 생성하시겠어요? 기존 진행도는 초기화됩니다.')) {
+      return;
+    }
+
+    try {
+      window.app.showAILoading();
+
+      const assessment = storage.getAssessment();
+      const result = await gemini.generateWeeklyGoals(assessment);
+
+      const tasks = storage.getTasks();
+
+      // 👇 기존 주간 목표 완전히 교체
+      tasks.weekly = [];
+
+      result.goals.forEach(goal => {
+        tasks.weekly.push({
+          id: UTILS.generateId(),
+          ...goal,
+          createdAt: new Date().toISOString(),
+          progress: 0,
+          completed: false
+        });
+      });
+
+      storage.setTasks(tasks);
+
+      // 갱신 날짜 기록
+      storage.recordWeeklyGoalsRefresh();
+
+      window.app.hideAILoading();
+      window.app.toast.show('✅ 주간 목표가 갱신되었어요!', 'success');
+
+      this.render();
+
+      // 대시보드도 업데이트
+      if (window.app.dashboard) {
+        window.app.dashboard.render();
+      }
+
+    } catch (error) {
+      console.error('주간 목표 갱신 오류:', error);
+      window.app.hideAILoading();
+      window.app.toast.show('❌ 목표 갱신 실패', 'error');
+    }
+  }
+ 0) {
       await this.generateDailyTasks();
     }
   }
