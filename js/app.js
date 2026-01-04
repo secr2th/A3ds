@@ -101,12 +101,13 @@ class ArtQuestApp {
   /**
    * Service Worker 등록
    */
-  registerServiceWorker() {
+    registerServiceWorker() {
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-          .then(reg => console.log('✅ Service Worker 등록 완료:', reg))
-          .catch(err => console.log('❌ Service Worker 등록 실패:', err));
+        // '/' 대신 './' 를 사용하여 상대 경로로 수정
+        navigator.serviceWorker.register('./service-worker.js')
+          .then(reg => console.log('✅ PWA 서비스 워커 등록 성공:', reg.scope))
+          .catch(err => console.log('❌ PWA 서비스 워커 등록 실패:', err));
       });
     }
   }
