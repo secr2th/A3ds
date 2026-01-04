@@ -20,7 +20,8 @@ class AnalyticsManager {
    */
   init() {
     this.render();
-    this.refreshAIFeedback();
+    // Don't auto-refresh AI feedback - only on button press
+    this.loadCachedAIFeedback();
   }
 
   /**
@@ -150,6 +151,25 @@ class AnalyticsManager {
   }
 
   /**
+   * Load cached AI feedback
+   */
+  loadCachedAIFeedback() {
+    const feedbackEl = document.getElementById('ai-feedback-content');
+    if (!feedbackEl) return;
+
+    const cachedFeedback = storage.get('cached_ai_feedback');
+    if (cachedFeedback) {
+      feedbackEl.innerHTML = `<p style="color: rgba(255,255,255,0.95); line-height: 1.6;">${cachedFeedback}</p>`;
+    } else {
+      feedbackEl.innerHTML = `
+        <p style="color: rgba(255,255,255,0.9);">
+          🎨 새로고침 버튼을 눌러 AI 코칭을 받아보세요!
+        </p>
+      `;
+    }
+  }
+
+  /**
    * AI 피드백 새로고침
    */
   async refreshAIFeedback() {
@@ -181,6 +201,9 @@ class AnalyticsManager {
         tasksCompleted: completedTasks,
         weakestCategory: CONFIG.CATEGORIES[weakestCategory].name
       });
+
+      // Cache the feedback
+      storage.set('cached_ai_feedback', feedback);
 
       feedbackEl.innerHTML = `<p style="color: rgba(255,255,255,0.95); line-height: 1.6;">${feedback}</p>`;
     } catch (error) {

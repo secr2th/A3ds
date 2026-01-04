@@ -29,9 +29,17 @@ class ThemeManager {
       this.customFonts = settings.theme.customFonts || [];
     }
 
+    // Load custom web fonts
+    this.customFonts.forEach(font => {
+      if (typeof font === 'object' && font.type === 'webfont') {
+        this.injectFontCSS(font.code, font.name);
+      }
+    });
+
     this.applyTheme();
     this.applyFont();
     this.updateUI();
+    this.updateCustomFontsList();
 
     // 시스템 다크모드 변경 감지
     if (window.matchMedia) {
@@ -116,6 +124,135 @@ class ThemeManager {
       console.error('Font load error:', error);
       window.app.toast.show('폰트를 불러올 수 없어요. 폰트명을 확인해주세요', 'error');
     }
+  }
+
+  /**
+   * Add web font using @font-face code
+   */
+  addWebFont() {
+    const nameInput = document.getElementById('custom-font-name');
+    const codeInput = document.getElementById('custom-font-code');
+    
+    if (!nameInput || !codeInput) return;
+
+    const fontName = nameInput.value.trim();
+    const fontCode = codeInput.value.trim();
+
+    if (!fontName || !fontCode) {
+      window.app.toast.show('폰트 이름과 CSS 코드를 모두 입력해주세요', 'warning');
+      return;
+    }
+
+    // Check if font already exists
+    const webFonts = this.customFonts.filter(f => typeof f === 'object') || [];
+    if (webFonts.some(f => f.name === fontName)) {
+      window.app.toast.show('이미 추가된 폰트예요', 'warning');
+      return;
+    }
+
+    try {
+      // Inject the font CSS
+      this.injectFontCSS(fontCode, fontName);
+
+      // Add to custom fonts list as object
+      this.customFonts.push({
+        name: fontName,
+        code: fontCode,
+        type: 'webfont'
+      });
+
+      this.saveThemeSettings();
+      this.updateFontSelect();
+      this.updateCustomFontsList();
+
+      nameInput.value = '';
+      codeInput.value = '';
+
+      window.app.toast.show(`✅ ${fontName} 폰트가 추가되었어요!`, 'success');
+    } catch (error) {
+      console.error('Web font error:', error);
+      window.app.toast.show('폰트 추가에 실패했어요', 'error');
+    }
+  }
+
+  /**
+   * Inject font CSS into document
+   */
+  injectFontCSS(cssCode, fontId) {
+    // Remove existing style if any
+    const existingStyle = document.getElementById(`custom-font-${fontId}`);
+    if (existingStyle) {
+      existingStyle.remove();
+    }
+
+    // Create and inject new style
+    const style = document.createElement('style');
+    style.id = `custom-font-${fontId}`;
+    style.textContent = cssCode;
+    document.head.appendChild(style);
+  }
+
+  /**
+   * Update custom fonts list display
+   */
+  updateCustomFontsList() {
+    const container = document.getElementById('custom-fonts-container');
+    const listSection = document.getElementById('custom-fonts-list');
+    
+    if (!container || !listSection) return;
+
+    const webFonts = this.customFonts.filter(f => typeof f === 'object');
+
+    if (webFonts.length === 0) {
+      listSection.style.display = 'none';
+      return;
+    }
+
+    listSection.style.display = 'block';
+    container.innerHTML = webFonts.map(font => `
+      <div style="display: flex; justify-content: space-between; align-items: center; 
+                  padding: 12px; background: var(--bg-secondary); border-radius: 8px; margin-bottom: 8px;">
+        <div>
+          <div style="font-weight: 600; margin-bottom: 4px;">${font.name}</div>
+          <div style="font-size: 12px; color: var(--text-tertiary);">웹폰트</div>
+        </div>
+        <button class="btn-danger" onclick="app.theme.removeWebFont('${font.name}')" 
+                style="padding: 6px 12px; font-size: 12px;">삭제</button>
+      </div>
+    `).join('');
+  }
+
+  /**
+   * Remove web font
+   */
+  removeWebFont(fontName) {
+    if (!confirm(`${fontName} 폰트를 삭제하시겠어요?`)) return;
+
+    // Remove from custom fonts
+    this.customFonts = this.customFonts.filter(f => {
+      if (typeof f === 'object') {
+        return f.name !== fontName;
+      }
+      return true;
+    });
+
+    // Remove injected CSS
+    const styleEl = document.getElementById(`custom-font-${fontName}`);
+    if (styleEl) {
+      styleEl.remove();
+    }
+
+    // Reset to default if currently using this font
+    if (this.currentFont === fontName) {
+      this.currentFont = 'Pretendard';
+      this.applyFont();
+    }
+
+    this.saveThemeSettings();
+    this.updateFontSelect();
+    this.updateCustomFontsList();
+
+    window.app.toast.show(`${fontName} 폰트가 삭제되었어요`, 'success');
   }
 
   /**
@@ -236,13 +373,18 @@ class ThemeManager {
       'Nanum Myeongjo'
     ];
 
+    // 커스텀 폰트 이름 추출 (문자열이면 그대로, 객체면 name 속성)
+    const customFontNames = this.customFonts.map(font => 
+      typeof font === 'object' ? font.name : font
+    );
+
     // 모든 폰트 합치기
-    const allFonts = [...defaultFonts, ...this.customFonts];
+    const allFonts = [...defaultFonts, ...customFontNames];
 
     // 옵션 재생성
     select.innerHTML = allFonts.map(font =>
       `<option value="${font}" ${font === this.currentFont ? 'selected' : ''}>
-        ${font}${this.customFonts.includes(font) ? ' (커스텀)' : ''}
+        ${font}${customFontNames.includes(font) ? ' (커스텀)' : ''}
       </option>`
     ).join('');
   }

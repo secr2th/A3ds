@@ -137,9 +137,13 @@ class ArtQuestApp {
   registerServiceWorker() {
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-          .then(reg => console.log('✅ Service Worker 등록 완료'))
-          .catch(err => console.log('⚠️ Service Worker 등록 실패:', err));
+        navigator.serviceWorker.register('./service-worker.js')
+          .then(reg => {
+            console.log('✅ Service Worker 등록 완료', reg.scope);
+          })
+          .catch(err => {
+            console.log('⚠️ Service Worker 등록 실패:', err);
+          });
       });
     }
   }
@@ -157,6 +161,13 @@ class ArtQuestApp {
 
     this.onboarding = {
       currentStep: 'api',
+
+      closeModal: () => {
+        const modal = document.getElementById('onboarding-modal');
+        if (confirm('설정을 중단하시겠습니까? 나중에 설정에서 다시 진행할 수 있습니다.')) {
+          modal.classList.add('hidden');
+        }
+      },
 
       saveApiKey: () => {
         const input = document.getElementById('api-key-input');
@@ -204,8 +215,11 @@ class ArtQuestApp {
           await this.onboarding.generateInitialData(assessment, analysis);
 
           modal.classList.add('hidden');
-          this.toast.show('🎉 환영합니다! 학습을 시작해볼까요?', 'success');
-          await this.initializeApp();
+          
+          // Show result popup MBTI-style
+          // Store that we need to init app after modal closes
+          window.app._pendingInitAfterAssessment = true;
+          this.showAssessmentResult(analysis, assessment);
 
         } catch (error) {
           console.error('분석 오류:', error);
@@ -283,7 +297,124 @@ class ArtQuestApp {
                this.updateTodayTasks();
                this.updateWeeklyGoals();
                this.updateStrengthsWeaknesses();
-               this.updateRecommendedResources();
+               this.updateSocialLinks();
+            },
+            checkAttendance: async () => {
+               // Check if tasks already generated today
+               const lastAttendance = storage.get('last_attendance_date');
+               const today = UTILS.formatDate(new Date());
+               
+               if (lastAttendance === today) {
+                 window.app.toast.show('오늘은 이미 출석했어요! 🎉', 'info');
+                 return;
+               }
+
+               // Generate 1-3 tasks
+               const assessment = storage.getAssessment();
+               if (!assessment) {
+                 window.app.toast.show('실력 진단이 필요합니다', 'warning');
+                 return;
+               }
+
+               try {
+                 window.app.showLoading('출석 체크 중...');
+                 
+                 const dayOfWeek = new Date().getDay();
+                 const result = await gemini.generateDailyTasks(assessment, dayOfWeek);
+                 
+                 // Only add 1-3 tasks
+                 const tasksToAdd = result.tasks.slice(0, Math.floor(Math.random() * 3) + 1);
+                 const tasks = storage.getTasks();
+                 
+                 tasksToAdd.forEach(task => {
+                   tasks.daily.push({
+                     id: UTILS.generateId(),
+                     ...task,
+                     date: today,
+                     createdAt: new Date().toISOString(),
+                     completed: false,
+                     completedAt: null
+                   });
+                 });
+                 
+                 storage.setTasks(tasks);
+                 storage.set('last_attendance_date', today);
+                 
+                 window.app.hideLoading();
+                 window.app.toast.show(`📅 출석 완료! ${tasksToAdd.length}개의 과제가 생성되었어요`, 'success');
+                 
+                 this.updateTodayTasks();
+               } catch (error) {
+                 console.error('Attendance error:', error);
+                 window.app.hideLoading();
+                 window.app.toast.show('출석 체크 실패', 'error');
+               }
+            },
+            refreshWeeklyGoals: async () => {
+               // Check if already refreshed this week
+               const lastRefresh = storage.get('last_weekly_refresh');
+               const currentWeek = UTILS.getWeekNumber(new Date());
+               
+               if (lastRefresh === currentWeek) {
+                 if (!confirm('이번 주 목표를 다시 생성하시겠어요? 기존 목표는 삭제됩니다.')) {
+                   return;
+                 }
+               }
+
+               try {
+                 await tasks.generateWeeklyGoals();
+                 storage.set('last_weekly_refresh', currentWeek);
+                 this.updateWeeklyGoals();
+               } catch (error) {
+                 console.error('Weekly goals refresh error:', error);
+               }
+            },
+            addSocialLink: () => {
+               const name = prompt('링크 이름 (예: 내 유튜브 채널):');
+               if (!name) return;
+               
+               const url = prompt('링크 URL:');
+               if (!url) return;
+               
+               const icons = {
+                 'youtube': '🎥',
+                 'twitter': '🐦',
+                 'instagram': '📷',
+                 'tiktok': '🎵',
+                 'blog': '✍️',
+                 'github': '💻',
+                 'portfolio': '🎨',
+                 'other': '🔗'
+               };
+               
+               const iconChoice = prompt(
+                 '아이콘을 선택하세요:\n1. YouTube (🎥)\n2. Twitter (🐦)\n3. Instagram (📷)\n4. TikTok (🎵)\n5. Blog (✍️)\n6. GitHub (💻)\n7. Portfolio (🎨)\n8. Other (🔗)'
+               );
+               
+               const iconMap = ['youtube', 'twitter', 'instagram', 'tiktok', 'blog', 'github', 'portfolio', 'other'];
+               const selectedIcon = icons[iconMap[parseInt(iconChoice) - 1]] || icons.other;
+               
+               const socialLinks = storage.get('social_links') || [];
+               socialLinks.push({
+                 id: UTILS.generateId(),
+                 name,
+                 url,
+                 icon: selectedIcon
+               });
+               
+               storage.set('social_links', socialLinks);
+               window.app.toast.show('✅ 링크가 추가되었어요!', 'success');
+               this.updateSocialLinks();
+            },
+            deleteSocialLink: (id) => {
+               if (!confirm('이 링크를 삭제하시겠어요?')) return;
+               
+               let socialLinks = storage.get('social_links') || [];
+               socialLinks = socialLinks.filter(link => link.id !== id);
+               storage.set('social_links', socialLinks);
+               
+               window.app.toast.show('🗑 링크가 삭제되었어요', 'success');
+               this.updateSocialLinks();
             }
          };
          this.dashboard.render();
@@ -356,27 +487,55 @@ class ArtQuestApp {
   updateWeeklyGoals() {
     const allTasks = storage.getTasks();
     const weeklyGoals = allTasks.weekly || [];
-    if (weeklyGoals.length === 0) return;
+    const container = document.getElementById('dashboard-weekly-goals');
+    
+    if (!container) return;
 
-    const firstGoal = weeklyGoals[0];
-    const goalCard = document.getElementById('weekly-goal-1');
-
-    if (goalCard && firstGoal) {
-      const icon = CONFIG.CATEGORIES[firstGoal.category]?.icon || '🎯';
-      const progress = (firstGoal.progress / firstGoal.targetCount) * 100;
-      goalCard.innerHTML = `
-        <div class="goal-icon">${icon}</div>
-        <div class="goal-content">
-          <h4>${firstGoal.title}</h4>
-          <p>${firstGoal.description}</p>
-          <div class="progress-bar small"><div class="progress-fill" style="width: ${progress}%"></div></div>
-        </div>`;
+    if (weeklyGoals.length === 0) {
+      container.innerHTML = `
+        <div style="text-align: center; padding: 32px; color: var(--text-secondary);">
+          <p style="margin-bottom: 12px;">주간 목표가 없어요</p>
+          <button class="btn-secondary" onclick="app.dashboard.refreshWeeklyGoals()">
+            목표 생성하기
+          </button>
+        </div>
+      `;
+      return;
     }
+
+    // Show all weekly goals (not just first one)
+    container.innerHTML = weeklyGoals.map(goal => {
+      const icon = CONFIG.CATEGORIES[goal.category]?.icon || '🎯';
+      const progress = goal.targetCount > 0 ? (goal.progress / goal.targetCount) * 100 : 0;
+      return `
+        <div class="goal-card" style="margin-bottom: 12px;">
+          <div class="goal-icon">${icon}</div>
+          <div class="goal-content">
+            <h4>${goal.title}</h4>
+            <p>${goal.description}</p>
+            <div class="progress-bar small">
+              <div class="progress-fill" style="width: ${progress}%"></div>
+            </div>
+            <small style="color: var(--text-tertiary); margin-top: 4px; display: block;">
+              ${goal.progress} / ${goal.targetCount} 완료
+            </small>
+          </div>
+        </div>
+      `;
+    }).join('');
   }
 
   updateStrengthsWeaknesses() {
     const analysis = storage.get('initial_analysis');
-    if (!analysis) return;
+    if (!analysis) {
+      // Only show message if no analysis exists
+      const strengthsList = document.getElementById('strengths-list');
+      const weaknessesList = document.getElementById('weaknesses-list');
+      
+      if (strengthsList) strengthsList.innerHTML = '<li>실력 진단을 완료하면 표시됩니다</li>';
+      if (weaknessesList) weaknessesList.innerHTML = '<li>실력 진단을 완료하면 표시됩니다</li>';
+      return;
+    }
 
     const fillList = (id, items) => {
         const el = document.getElementById(id);
@@ -398,7 +557,17 @@ class ArtQuestApp {
       return;
     }
 
-    container.innerHTML = list.slice(0, 5).map(res => `
+    // Get one resource per category, max 3 total
+    const categorizedResources = {};
+    list.forEach(res => {
+      if (!categorizedResources[res.category]) {
+        categorizedResources[res.category] = res;
+      }
+    });
+
+    const limitedResources = Object.values(categorizedResources).slice(0, 3);
+
+    container.innerHTML = limitedResources.map(res => `
       <a href="${res.url}" target="_blank" class="resource-item">
         <div class="resource-icon">${res.type === 'video' ? '🎥' : '📚'}</div>
         <div class="resource-content">
@@ -407,6 +576,41 @@ class ArtQuestApp {
         </div>
         <span class="resource-type">${res.type}</span>
       </a>`).join('');
+  }
+
+  updateSocialLinks() {
+    const socialLinks = storage.get('social_links') || [];
+    const container = document.getElementById('social-links');
+    if (!container) return;
+
+    if (socialLinks.length === 0) {
+      container.innerHTML = `
+        <div class="empty-social-links">
+          <div class="icon">🔗</div>
+          <p>아직 추가된 링크가 없어요</p>
+          <p style="font-size: 14px; margin-top: 8px;">유튜브, 트위터 등의 링크를 추가해보세요!</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = socialLinks.map(link => `
+      <div class="social-link-card">
+        <div class="social-link-icon">${link.icon}</div>
+        <div class="social-link-content">
+          <h4>${link.name}</h4>
+          <a href="${link.url}" target="_blank" rel="noopener noreferrer">${link.url}</a>
+        </div>
+        <div class="social-link-actions">
+          <button class="icon-btn" onclick="window.open('${link.url}', '_blank')" title="열기">
+            <span class="icon">🔗</span>
+          </button>
+          <button class="icon-btn" onclick="app.dashboard.deleteSocialLink('${link.id}')" title="삭제">
+            <span class="icon">🗑</span>
+          </button>
+        </div>
+      </div>
+    `).join('');
   }
 
   initSettings() {
@@ -433,12 +637,27 @@ class ArtQuestApp {
         }
       },
       reopenAssessment: () => {
-        if (!confirm('다시 진단하시겠어요?')) return;
+        if (!confirm('다시 진단하시겠어요? 기존 분석 결과가 업데이트됩니다.')) return;
         const modal = document.getElementById('onboarding-modal');
         document.getElementById('step-api')?.classList.add('hidden');
         document.getElementById('step-assessment')?.classList.remove('hidden');
         document.getElementById('step-analyzing')?.classList.add('hidden');
         modal.classList.remove('hidden');
+        
+        // Update onboarding callbacks to work from settings
+        if (window.app.onboarding) {
+          // Store original complete function
+          const originalComplete = window.app.onboarding.completeAssessment;
+          
+          // Override to refresh dashboard after completion
+          window.app.onboarding.completeAssessment = async function() {
+            await originalComplete();
+            // Refresh dashboard to show new strengths/weaknesses
+            if (window.app.dashboard) {
+              window.app.dashboard.render();
+            }
+          };
+        }
       }
     };
 
@@ -486,6 +705,118 @@ class ArtQuestApp {
   hideLoading() {
     const loading = document.getElementById('loading');
     if (loading) loading.classList.add('hidden');
+  }
+
+  showAILoading() {
+    const modal = document.getElementById('ai-loading-modal');
+    if (modal) modal.classList.remove('hidden');
+  }
+
+  hideAILoading() {
+    const modal = document.getElementById('ai-loading-modal');
+    if (modal) modal.classList.add('hidden');
+  }
+
+  showAssessmentResult(analysis, assessment) {
+    const modal = document.getElementById('assessment-result-modal');
+    const content = document.getElementById('assessment-result-content');
+    
+    if (!modal || !content) return;
+
+    // Count beginner/intermediate/advanced levels
+    const levels = Object.values(assessment);
+    const beginnerCount = levels.filter(l => l === 'beginner').length;
+    const intermediateCount = levels.filter(l => l === 'intermediate').length;
+    const advancedCount = levels.filter(l => l === 'advanced').length;
+
+    // Generate personality type
+    let personalityType = '';
+    let typeEmoji = '';
+    if (beginnerCount >= 4) {
+      personalityType = '새싹 아티스트 🌱';
+      typeEmoji = '🌱';
+    } else if (advancedCount >= 4) {
+      personalityType = '프로 크리에이터 🎨';
+      typeEmoji = '🎨';
+    } else if (intermediateCount >= 4) {
+      personalityType = '성장하는 아티스트 🌟';
+      typeEmoji = '🌟';
+    } else {
+      personalityType = '균형잡힌 학습자 ⚖️';
+      typeEmoji = '⚖️';
+    }
+
+    content.innerHTML = `
+      <div class="assessment-result">
+        <div style="text-align: center; margin-bottom: 32px;">
+          <div style="font-size: 64px; margin-bottom: 16px;">${typeEmoji}</div>
+          <h2 style="font-size: 28px; margin-bottom: 8px;">${personalityType}</h2>
+          <p style="color: var(--text-secondary); font-size: 16px;">당신의 현재 실력 수준은 <strong>${analysis.overallLevel}</strong>입니다</p>
+        </div>
+
+        <div style="background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light)); 
+                    color: white; padding: 24px; border-radius: 16px; margin-bottom: 24px;">
+          <h3 style="color: white; margin-bottom: 16px; font-size: 18px;">💪 당신의 강점</h3>
+          <ul style="list-style: none; padding: 0; margin: 0;">
+            ${analysis.strengths.map(s => `
+              <li style="padding: 8px 0; display: flex; align-items: start; gap: 12px;">
+                <span style="flex-shrink: 0;">✓</span>
+                <span>${s}</span>
+              </li>
+            `).join('')}
+          </ul>
+        </div>
+
+        <div style="background: var(--bg-secondary); padding: 24px; border-radius: 16px; margin-bottom: 24px;">
+          <h3 style="margin-bottom: 16px; font-size: 18px;">📈 개선이 필요한 영역</h3>
+          <ul style="list-style: none; padding: 0; margin: 0;">
+            ${analysis.weaknesses.map(w => `
+              <li style="padding: 8px 0; display: flex; align-items: start; gap: 12px; color: var(--text-secondary);">
+                <span style="flex-shrink: 0;">•</span>
+                <span>${w}</span>
+              </li>
+            `).join('')}
+          </ul>
+        </div>
+
+        <div style="background: var(--bg-secondary); padding: 24px; border-radius: 16px; margin-bottom: 24px;">
+          <h3 style="margin-bottom: 16px; font-size: 18px;">🎯 맞춤 학습 추천</h3>
+          <ul style="list-style: none; padding: 0; margin: 0;">
+            ${analysis.recommendations.map(r => `
+              <li style="padding: 8px 0; display: flex; align-items: start; gap: 12px; color: var(--text-secondary);">
+                <span style="flex-shrink: 0;">→</span>
+                <span>${r}</span>
+              </li>
+            `).join('')}
+          </ul>
+        </div>
+
+        <div style="background: linear-gradient(135deg, #10b981, #059669); 
+                    color: white; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 24px;">
+          <p style="color: white; font-size: 16px; font-weight: 500; margin: 0;">
+            ${analysis.learningTips[0] || '꾸준함이 가장 중요합니다! 매일 조금씩 연습해보세요 🎨'}
+          </p>
+        </div>
+
+        <button class="btn-primary" onclick="app.closeAssessmentResult()" style="width: 100%;">
+          학습 시작하기 🚀
+        </button>
+      </div>
+    `;
+
+    modal.classList.remove('hidden');
+  }
+
+  closeAssessmentResult() {
+    const modal = document.getElementById('assessment-result-modal');
+    if (modal) modal.classList.add('hidden');
+    this.toast.show('🎉 환영합니다! 학습을 시작해볼까요?', 'success');
+    
+    // Initialize app if this was called after assessment
+    if (window.app._pendingInitAfterAssessment) {
+      window.app._pendingInitAfterAssessment = false;
+      this.initializeApp();
+    }
   }
 }
 
