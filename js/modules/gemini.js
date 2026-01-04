@@ -1,26 +1,39 @@
 /**
- * Gemini API Module
- * - Google Gemini AI 통신
+ * Gemini API Module (Official SDK)
+ * - Google Gemini AI 통신 (공식 SDK 사용)
  * - 실력 분석
  * - 학습 플랜 생성
  * - 피드백 생성
  */
 
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { CONFIG } from '../config.js';
 import storage from './storage.js';
 
 class GeminiAPI {
   constructor() {
     this.apiKey = null;
-    this.endpoint = CONFIG.GEMINI_API_ENDPOINT;
+    this.genAI = null;
+    this.model = null;
   }
 
   /**
-   * API 키 설정
+   * API 키 설정 및 클라이언트 초기화
    */
   setApiKey(key) {
     this.apiKey = key;
     storage.setApiKey(key);
+
+    try {
+      // Google Generative AI 클라이언트 초기화
+      this.genAI = new GoogleGenerativeAI(key);
+      // Gemini 2.0 Flash 모델 사용
+      this.model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+      console.log('✅ Gemini API 클라이언트 초기화 완료');
+    } catch (error) {
+      console.error('❌ Gemini API 초기화 실패:', error);
+      throw error;
+    }
   }
 
   /**
@@ -29,8 +42,24 @@ class GeminiAPI {
   getApiKey() {
     if (!this.apiKey) {
       this.apiKey = storage.getApiKey();
+      if (this.apiKey) {
+        this.setApiKey(this.apiKey);
+      }
     }
     return this.apiKey;
+  }
+
+  /**
+   * 모델 초기화 확인
+   */
+  ensureInitialized() {
+    if (!this.model) {
+      const apiKey = this.getApiKey();
+      if (!apiKey) {
+        throw new Error('API 키가 설정되지 않았습니다.');
+      }
+      this.setApiKey(apiKey);
+    }
   }
 
   /**
@@ -38,7 +67,8 @@ class GeminiAPI {
    */
   async testConnection() {
     try {
-      const response = await this.generateContent('안녕하세요. 연결 테스트입니다.');
+      this.ensureInitialized();
+      const response = await this.generateContent('안녕하세요. 연결 테스트입니다. 간단히 응답해주세요.');
       return response ? true : false;
     } catch (error) {
       console.error('Connection test failed:', error);
@@ -49,42 +79,37 @@ class GeminiAPI {
   /**
    * Gemini API 호출 (기본)
    */
-  async generateContent(prompt, temperature = 0.7) {
-    const apiKey = this.getApiKey();
-    if (!apiKey) {
-      throw new Error('API 키가 설정되지 않았습니다.');
-    }
+  async generateContent(prompt, options = {}) {
+    this.ensureInitialized();
 
     try {
-      const response = await fetch(`${this.endpoint}?key=${apiKey}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: prompt
-            }]
-          }],
-          generationConfig: {
-            temperature: temperature,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 2048,
-          }
-        })
+      const generationConfig = {
+        temperature: options.temperature || 0.7,
+        topK: options.topK || 40,
+        topP: options.topP || 0.95,
+        maxOutputTokens: options.maxOutputTokens || 2048,
+      };
+
+      const result = await this.model.generateContent({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig,
       });
 
-      if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
-      }
+      const response = result.response;
+      const text = response.text();
 
-      const data = await response.json();
-      return data.candidates[0].content.parts[0].text;
+      return text;
     } catch (error) {
       console.error('Gemini API Error:', error);
-      throw error;
+
+      // 에러 메시지 개선
+      if (error.message.includes('API_KEY_INVALID')) {
+        throw new Error('API 키가 유효하지 않습니다. 설정에서 확인해주세요.');
+      } else if (error.message.includes('QUOTA_EXCEEDED')) {
+        throw new Error('API 할당량을 초과했습니다. 잠시 후 다시 시도해주세요.');
+      } else {
+        throw new Error(`AI 요청 실패: ${error.message}`);
+      }
     }
   }
 
@@ -104,7 +129,7 @@ class GeminiAPI {
 
 (각 항목: beginner=초급, intermediate=중급, advanced=상급)
 
-이 학생을 위한 분석을 다음 JSON 형식으로 제공해주세요:
+이 학생을 위한 분석을 다음 JSON 형식으로 제공해주세요. 반드시 유효한 JSON만 반환하고 다른 텍스트는 포함하지 마세요:
 
 {
   "strengths": ["강점1", "강점2", "강점3"],
@@ -113,12 +138,11 @@ class GeminiAPI {
   "recommendations": ["추천사항1", "추천사항2", "추천사항3"],
   "learningTips": ["학습팁1", "학습팁2", "학습팁3"]
 }
-
-JSON만 반환하고 다른 텍스트는 포함하지 마세요.
 `;
 
     try {
-      const response = await this.generateContent(prompt);
+      const response = await this.generateContent(prompt, { temperature: 0.5 });
+
       // JSON 파싱 (마크다운 코드 블록 제거)
       const jsonMatch = response.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
@@ -159,7 +183,7 @@ ${Object.entries(assessment).map(([key, value]) =>
 
 오늘은 ${days[dayOfWeek]}입니다.
 
-이 학생을 위한 오늘의 그림 연습 과제 3-5개를 다음 JSON 형식으로 제공해주세요:
+이 학생을 위한 오늘의 그림 연습 과제 3-5개를 JSON 형식으로 제공해주세요. 반드시 유효한 JSON만 반환하세요:
 
 {
   "tasks": [
@@ -174,16 +198,15 @@ ${Object.entries(assessment).map(([key, value]) =>
   ]
 }
 
+요구사항:
 - 실력에 맞는 난이도로 구성
 - ADHD를 고려해 15-30분 단위로 분할
 - 구체적이고 실행 가능한 과제
 - 다양한 카테고리 포함
-
-JSON만 반환하세요.
 `;
 
     try {
-      const response = await this.generateContent(prompt);
+      const response = await this.generateContent(prompt, { temperature: 0.6 });
       const jsonMatch = response.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         return JSON.parse(jsonMatch[0]);
@@ -233,7 +256,7 @@ ${Object.entries(assessment).map(([key, value]) =>
   `- ${CONFIG.CATEGORIES[key].name}: ${value}`
 ).join('\n')}
 
-이 학생을 위한 이번 주 학습 목표 3-4개를 JSON 형식으로 제공해주세요:
+이 학생을 위한 이번 주 학습 목표 3-4개를 JSON 형식으로 제공해주세요. 반드시 유효한 JSON만 반환하세요:
 
 {
   "goals": [
@@ -247,15 +270,14 @@ ${Object.entries(assessment).map(([key, value]) =>
   ]
 }
 
+요구사항:
 - 실력 향상에 도움되는 목표
 - 일주일 내 달성 가능한 수준
 - 약점 보완과 강점 강화 균형
-
-JSON만 반환하세요.
 `;
 
     try {
-      const response = await this.generateContent(prompt);
+      const response = await this.generateContent(prompt, { temperature: 0.6 });
       const jsonMatch = response.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         return JSON.parse(jsonMatch[0]);
@@ -287,7 +309,7 @@ ${Object.entries(assessment).map(([key, value]) =>
   `- ${CONFIG.CATEGORIES[key].name}: ${value}`
 ).join('\n')}
 
-이 학생에게 적합한 학습 자료 5-8개를 추천해주세요. JSON 형식:
+이 학생에게 적합한 학습 자료 5-8개를 추천해주세요. JSON 형식으로, 반드시 유효한 JSON만 반환하세요:
 
 {
   "resources": [
@@ -302,15 +324,14 @@ ${Object.entries(assessment).map(([key, value]) =>
   ]
 }
 
+요구사항:
 - 유튜브, 블로그, 온라인 강의 등 실제 접근 가능한 자료
 - 한국어 자료 우선
 - 실력에 맞는 난이도
-
-JSON만 반환하세요.
 `;
 
     try {
-      const response = await this.generateContent(prompt);
+      const response = await this.generateContent(prompt, { temperature: 0.7 });
       const jsonMatch = response.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         return JSON.parse(jsonMatch[0]);
@@ -318,7 +339,6 @@ JSON만 반환하세요.
       throw new Error('Invalid JSON response');
     } catch (error) {
       console.error('Resource recommendation error:', error);
-      // 폴백 리소스
       return {
         resources: [
           {
@@ -358,7 +378,7 @@ ${Object.entries(weekData.categoryActivity).map(([cat, count]) =>
   `- ${CONFIG.CATEGORIES[cat].name}: ${count}회`
 ).join('\n')}
 
-이번 주 성과를 분석하고 다음 주 방향을 제시해주세요. 다음 형식으로:
+이번 주 성과를 분석하고 다음 주 방향을 제시해주세요. JSON 형식으로, 반드시 유효한 JSON만 반환하세요:
 
 {
   "summary": "이번 주 전체 평가 (2-3문장)",
@@ -367,12 +387,10 @@ ${Object.entries(weekData.categoryActivity).map(([cat, count]) =>
   "nextWeekFocus": "다음 주 집중 영역 추천",
   "motivationalMessage": "격려 메시지"
 }
-
-JSON만 반환하세요.
 `;
 
     try {
-      const response = await this.generateContent(prompt);
+      const response = await this.generateContent(prompt, { temperature: 0.7 });
       const jsonMatch = response.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         return JSON.parse(jsonMatch[0]);
@@ -409,7 +427,7 @@ JSON만 반환하세요.
 `;
 
     try {
-      const response = await this.generateContent(prompt, 0.8);
+      const response = await this.generateContent(prompt, { temperature: 0.8 });
       return response.trim();
     } catch (error) {
       console.error('Feedback generation error:', error);
