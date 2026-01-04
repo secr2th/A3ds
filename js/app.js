@@ -124,7 +124,7 @@ class ArtQuestApp {
       if (nav) nav.classList.remove('hidden');
 
       // 일일 과제 체크
-      await tasks.checkAndGenerateDailyTasks();
+      //await tasks.checkAndGenerateDailyTasks();
     } catch (error) {
       console.error('initializeApp 내부 오류:', error);
       throw error; // 상위 init의 catch로 전달
