@@ -556,6 +556,202 @@ class ArtQuestApp {
     };
   }
 
+  
+  /**
+   * AI 로딩 표시
+   */
+  showAILoading() {
+    const overlay = document.getElementById('ai-loading-overlay');
+    if (overlay) overlay.classList.remove('hidden');
+  }
+
+  /**
+   * AI 로딩 숨김
+   */
+  hideAILoading() {
+    const overlay = document.getElementById('ai-loading-overlay');
+    if (overlay) overlay.classList.add('hidden');
+  }
+
+    /**
+   * 실력 진단 결과 모달 표시
+   */
+  showAssessmentResult(assessment, analysis) {
+    const modal = document.getElementById('assessment-result-modal');
+    const content = document.getElementById('assessment-result-content');
+
+    if (!modal || !content) return;
+
+    // 레벨 한글 변환
+    const levelKR = {
+      beginner: '초급',
+      intermediate: '중급',
+      advanced: '상급'
+    };
+
+    // 카테고리별 레벨
+    const categoryCards = Object.entries(assessment).map(([key, level]) => {
+      const cat = CONFIG.CATEGORIES[key];
+      return `
+        <div class="category-result-card">
+          <div class="category-result-icon">${cat.icon}</div>
+          <div class="category-result-name">${cat.name}</div>
+          <div class="category-result-level">${levelKR[level]}</div>
+        </div>
+      `;
+    }).join('');
+
+    content.innerHTML = `
+      <div class="assessment-result">
+        <!-- 헤더 -->
+        <div class="assessment-result-header">
+          <h2>🎨 당신은 이런 아티스트예요</h2>
+          <div class="assessment-result-level">
+            전체 레벨: ${analysis.overallLevel}
+          </div>
+        </div>
+
+        <!-- 전체 요약 -->
+        <div class="assessment-result-summary">
+          <h3>📝 종합 평가</h3>
+          <p>
+            당신은 <strong>${analysis.overallLevel}</strong> 수준의 실력을 가지고 있어요.
+            ${analysis.overallLevel === '초급' ? '이제 막 그림을 시작하셨거나 기초를 다지고 계시는 단계예요. 꾸준한 연습이 가장 중요한 시기입니다!' : ''}
+            ${analysis.overallLevel === '중급' ? '기본기가 어느 정도 갖춰진 상태예요. 이제 세부적인 기술을 연마하고 자신만의 스타일을 찾아가는 단계입니다!' : ''}
+            ${analysis.overallLevel === '상급' ? '탄탄한 실력을 갖추셨네요! 더욱 전문적인 기법과 창의적 표현에 도전해볼 시기예요!' : ''}
+          </p>
+        </div>
+
+        <!-- 카테고리별 레벨 -->
+        <h3 style="margin-bottom: 16px;">📊 분야별 실력</h3>
+        <div class="assessment-categories">
+          ${categoryCards}
+        </div>
+
+        <!-- 강점/약점 -->
+        <div class="assessment-strengths-weaknesses">
+          <div class="result-sw-card strength">
+            <h4>💪 당신의 강점</h4>
+            <ul>
+              ${analysis.strengths.map(s => `<li>${s}</li>`).join('')}
+            </ul>
+          </div>
+          <div class="result-sw-card weakness">
+            <h4>📈 개선이 필요한 부분</h4>
+            <ul>
+              ${analysis.weaknesses.map(w => `<li>${w}</li>`).join('')}
+            </ul>
+          </div>
+        </div>
+
+        <!-- 추천 학습 방향 -->
+        <div class="assessment-recommendations">
+          <h3>🎯 맞춤 학습 가이드</h3>
+          <ul>
+            ${analysis.recommendations.map(r => `<li>${r}</li>`).join('')}
+          </ul>
+        </div>
+
+        <!-- 학습 팁 -->
+        ${analysis.learningTips && analysis.learningTips.length > 0 ? `
+          <div class="assessment-result-summary">
+            <h3>💡 학습 팁</h3>
+            <ul style="list-style: none; padding: 0;">
+              ${analysis.learningTips.map(tip => `
+                <li style="padding: 8px 0; color: var(--text-secondary);">
+                  • ${tip}
+                </li>
+              `).join('')}
+            </ul>
+          </div>
+        ` : ''}
+
+        <button class="btn-primary" onclick="document.getElementById('assessment-result-modal').classList.add('hidden')" style="width: 100%; margin-top: 24px;">
+          학습 시작하기
+        </button>
+      </div>
+    `;
+
+    modal.classList.remove('hidden');
+  }
+
+        /**
+       * 실력 재진단
+       */
+      reopenAssessment: () => {
+        if (!confirm('다시 진단하시겠어요?')) return;
+
+        const modal = document.getElementById('onboarding-modal');
+
+        // 평가 단계로 이동
+        document.getElementById('step-api')?.classList.add('hidden');
+        document.getElementById('step-assessment')?.classList.remove('hidden');
+        document.getElementById('step-analyzing')?.classList.add('hidden');
+
+        // 기존 평가 데이터 불러오기
+        const currentAssessment = storage.getAssessment();
+        if (currentAssessment) {
+          Object.entries(currentAssessment).forEach(([category, level]) => {
+            const radio = document.querySelector(`input[name="${category}"][value="${level}"]`);
+            if (radio) radio.checked = true;
+          });
+        }
+
+        // 👇 완료 버튼 핸들러 수정
+        const completeBtn = document.querySelector('#step-assessment .btn-primary');
+        if (completeBtn) {
+          completeBtn.onclick = async () => {
+            const categories = ['basic', 'anatomy', 'perspective', 'shading', 'color', 'composition'];
+            const assessment = {};
+            let allSelected = true;
+
+            categories.forEach(cat => {
+              const selected = document.querySelector(`input[name="${cat}"]:checked`);
+              if (selected) assessment[cat] = selected.value;
+              else allSelected = false;
+            });
+
+            if (!allSelected) {
+              window.app.toast.show('모든 항목을 선택해주세요', 'warning');
+              return;
+            }
+
+            storage.setAssessment(assessment);
+
+            document.getElementById('step-assessment')?.classList.add('hidden');
+            document.getElementById('step-analyzing')?.classList.remove('hidden');
+
+            try {
+              const analysis = await window.app.gemini.analyzeAssessment(assessment);
+
+              // 분석 결과 저장
+              storage.set('initial_analysis', analysis);
+
+              modal.classList.add('hidden');
+
+              // 👇 결과 모달 표시
+              window.app.showAssessmentResult(assessment, analysis);
+
+              window.app.toast.show('✅ 실력 진단이 완료되었어요!', 'success');
+
+              // 대시보드 업데이트
+              if (window.app.dashboard) {
+                window.app.dashboard.render();
+              }
+
+            } catch (error) {
+              console.error('재진단 오류:', error);
+              window.app.toast.show('진단 실패', 'error');
+              document.getElementById('step-analyzing')?.classList.add('hidden');
+              document.getElementById('step-assessment')?.classList.remove('hidden');
+            }
+          };
+        }
+
+        modal.classList.remove('hidden');
+      }
+
+
   navigate(view) {
     if(this.router) this.router.navigate(view);
   }
@@ -588,21 +784,6 @@ class ArtQuestApp {
   }
 }
 
-  /**
-   * AI 로딩 표시
-   */
-  showAILoading() {
-    const overlay = document.getElementById('ai-loading-overlay');
-    if (overlay) overlay.classList.remove('hidden');
-  }
-
-  /**
-   * AI 로딩 숨김
-   */
-  hideAILoading() {
-    const overlay = document.getElementById('ai-loading-overlay');
-    if (overlay) overlay.classList.add('hidden');
-  }
 
 
 // 앱 인스턴스 생성 및 전역 할당 (DOM 로드 전이라도 안전하게)
