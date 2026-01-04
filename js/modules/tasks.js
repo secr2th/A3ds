@@ -352,6 +352,9 @@ class TaskManager {
     this.renderCustomTasks(tasks.custom);
   }
 
+    this.updateAttendButton();
+}
+
   /**
    * 일일 과제 렌더링
    */
