@@ -489,6 +489,22 @@ class ArtQuestApp {
   }
 }
 
+  /**
+   * 온보딩 닫기
+   */
+  closeOnboarding() {
+    if (confirm('온보딩을 취소하시겠어요? 나중에 다시 설정할 수 있습니다.')) {
+      const modal = document.getElementById('onboarding-modal');
+      modal.classList.add('hidden');
+
+      // 만약 API 키가 없다면 설정 페이지로 유도
+      const apiKey = storage.getApiKey();
+      if (!apiKey) {
+        this.toast.show('설정에서 API 키를 등록해주세요', 'info');
+      }
+    }
+  }
+
 // 앱 인스턴스 생성 및 전역 할당 (DOM 로드 전이라도 안전하게)
 const app = new ArtQuestApp();
 window.app = app;
