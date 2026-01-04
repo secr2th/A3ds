@@ -19,9 +19,99 @@ class TaskManager {
    * 초기화
    */
   async init() {
-    await this.checkAndGenerateDailyTasks();
+    // 👇 자동 생성 제거
+    // await this.checkAndGenerateDailyTasks();
     this.render();
   }
+
+  /**
+   * 출석 (오늘의 과제 생성)
+   */
+  async attendToday() {
+    // 이미 출석했는지 확인
+    if (storage.isAttendedToday()) {
+      window.app.toast.show('오늘 이미 출석했어요! 😊', 'info');
+      return;
+    }
+
+    try {
+      window.app.showAILoading();
+
+      const assessment = storage.getAssessment();
+      if (!assessment) {
+        throw new Error('실력 진단이 필요합니다.');
+      }
+
+      const dayOfWeek = new Date().getDay();
+      const result = await gemini.generateDailyTasks(assessment, dayOfWeek);
+
+      const tasks = storage.getTasks();
+      const today = UTILS.formatDate(new Date());
+
+      // 기존 오늘 과제 제거 (혹시 있다면)
+      tasks.daily = tasks.daily.filter(t => UTILS.formatDate(t.date || t.createdAt) !== today);
+
+      // 1~3개 랜덤 선택
+      const selectedTasks = result.tasks
+        .sort(() => Math.random() - 0.5)
+        .slice(0, Math.floor(Math.random() * 3) + 1);
+
+      selectedTasks.forEach(task => {
+        tasks.daily.push({
+          id: UTILS.generateId(),
+          ...task,
+          date: today,
+          createdAt: new Date().toISOString(),
+          completed: false,
+          completedAt: null
+        });
+      });
+
+      storage.setTasks(tasks);
+
+      // 출석 기록
+      storage.recordAttendance();
+
+      // 연속 일수 업데이트
+      storage.updateStreak();
+
+      window.app.hideAILoading();
+      window.app.toast.show(`✅ 출석 완료! 오늘의 과제 ${selectedTasks.length}개가 생성되었어요`, 'success');
+
+      this.render();
+
+      // 대시보드도 업데이트
+      if (window.app.dashboard) {
+        window.app.dashboard.render();
+      }
+
+    } catch (error) {
+      console.error('출석 처리 오류:', error);
+      window.app.hideAILoading();
+      window.app.toast.show('❌ 출석 처리 실패', 'error');
+    }
+  }
+
+  /**
+   * 오늘 출석 여부에 따라 버튼 상태 업데이트
+   */
+  updateAttendButton() {
+    const btn = document.getElementById('attend-btn');
+    if (!btn) return;
+
+    if (storage.isAttendedToday()) {
+      btn.textContent = '✓ 출석 완료';
+      btn.disabled = true;
+      btn.style.opacity = '0.6';
+      btn.style.cursor = 'not-allowed';
+    } else {
+      btn.textContent = '✓ 출석';
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.style.cursor = 'pointer';
+    }
+  }
+
 
   /**
    * 일일 과제 자동 생성 체크
